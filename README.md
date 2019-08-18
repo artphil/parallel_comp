@@ -1,2 +1,2 @@
-# parallel_computing
+# parallel_comp
 Algoritms to Parallel computing class
