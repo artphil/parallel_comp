@@ -8,7 +8,7 @@ all : ${BINS}
 
 % : %.cpp
 	@echo "Checking.."
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $< -o $@
 
 clean:
 	rm -rvf *.o ${BINS}
