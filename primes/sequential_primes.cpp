@@ -6,7 +6,8 @@ int main(int argc, char **argv)
 {
     long MAX_NUMBER;
     char OPTION;
-    long *all_numbers;
+    char *all_numbers;
+    long *primes;
     long last_prime;
     long number, multiple;
     clock_t start_time, end_time;
@@ -35,18 +36,20 @@ int main(int argc, char **argv)
 
     start_time = clock();
 
-    all_numbers = (long *)calloc(MAX_NUMBER, sizeof(long));
+    all_numbers = (char *)calloc(MAX_NUMBER, sizeof(char));
     all_numbers[0] = all_numbers[1] = 1;
+
+    primes = (long *)calloc(MAX_NUMBER, sizeof(long));
     last_prime = 0;
 
     for (number = 2; number < MAX_NUMBER; number++)
     {
         if (all_numbers[number] == 0)
         {
-            all_numbers[last_prime++] = number;
+            primes[last_prime++] = number;
 
             for (multiple = number; multiple < MAX_NUMBER; multiple += number)
-                all_numbers[multiple] = 1;
+                if (all_numbers[multiple] == 0) all_numbers[multiple] = 1;
         }
     }
 
@@ -54,11 +57,9 @@ int main(int argc, char **argv)
 
     if (to_print)
     {
-        number = 0;
-        while (all_numbers[number] != 1)
+        for (number = 0; number < last_prime; number++)
         {
-            printf("%lu ", all_numbers[number]);
-            number++;
+            printf("%lu ", primes[number]);
         }
         printf("\n");
     }
