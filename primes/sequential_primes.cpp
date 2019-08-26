@@ -14,6 +14,7 @@ int main(int argc, char **argv)
     bool to_print;
     bool to_time;
 
+    // Le argumentos
     if (argc < 4)
     {
         printf("Numero de agrumentos invalido\n");
@@ -34,14 +35,18 @@ int main(int argc, char **argv)
     else if (OPTION == 'l')
         to_print = true;
 
+    // Inicia a contagem do tempo
     start_time = clock();
 
+    // Cria vetor de numeros
     all_numbers = (char *)calloc(MAX_NUMBER, sizeof(char));
     all_numbers[0] = all_numbers[1] = 1;
 
+    // Cria vetor de primos
     primes = (long *)calloc(MAX_NUMBER, sizeof(long));
     last_prime = 0;
 
+    // Executa algoritimo de Eraclito
     for (number = 2; number < MAX_NUMBER; number++)
     {
         if (all_numbers[number] == 0)
@@ -53,8 +58,10 @@ int main(int argc, char **argv)
         }
     }
 
+    // Encerra a contagem do tempo
     end_time = clock();
 
+    // Imprime os primos
     if (to_print)
     {
         for (number = 0; number < last_prime; number++)
@@ -63,6 +70,7 @@ int main(int argc, char **argv)
         }
         printf("\n");
     }
+    // Imprime o tempo
     if (to_time)
         printf("%.6lf\n", (double)(end_time - start_time)/CLOCKS_PER_SEC);
 
