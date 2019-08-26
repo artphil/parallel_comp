@@ -4,18 +4,25 @@ import os
 pmax = 10
 nmax = 8
 testes = 10
-
-# file = open(sys.argv[1], 'w')
-# if not file: quit()
+filename = "teste.csv"
+output = "output.txt"
 
 log = [ 10**k for k in range(nmax) ]
 for n in log:
     for p in range(1,pmax+1):
-        # file.write('./parallel_primes {} t {}\n >> t1'.format(n,p) )
-        os.system('echo ./parallel_primes {} t {} >> t1'.format(n,p) )
+        os.system('echo ./parallel_primes {} t {} >> {}'.format(n,p,output) )
         for x in range(testes):
-            os.system('./parallel_primes {} t {} >> t1'.format(n,p) )
+            os.system('./parallel_primes {} t {} >> {}'.format(n,p,output) )
             # file.write(str(p)+' threads;'+str(os.system('./parallel_primes {} t {} '.format(n,p) ) )+'; ')
         # file.write('\n')
 
-# file.close()
+file_in =  open(output, 'r')
+file_out =  open(filename, 'w')
+
+for line in file_in.readlines():
+    if line[0] == '.':
+        file_out.write("\n"+line[:-1])
+    else:
+        file_out.write(";"+line[:-1])
+
+
