@@ -1,8 +1,8 @@
 import sys
 import os
 
-pmax = 10
-nmax = 8
+pmax = 5
+nmax = 3
 testes = 10
 filename = "teste.csv"
 output = "output.txt"
@@ -21,7 +21,7 @@ file_out =  open(filename, 'w')
 
 for line in file_in.readlines():
     if line[0] == '.':
-        file_out.write("\n"+line[:-1])
+        file_out.write("\n"+";".join(line[:-1].split(" ")))
     else:
         file_out.write(";"+line[:-1])
 
