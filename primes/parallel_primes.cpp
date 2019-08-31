@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 	bool to_print;
 	bool to_time;
 	bool print_threads;
-	float t_timer;
+	double t_timer;
 	struct timeval start_time, end_time;
 
 	// Le argumentos
@@ -30,7 +30,8 @@ int main(int argc, char **argv)
 		MAX_NUMBER = atoi(argv[1]) + 1;
 		OPTION = argv[2][0];
 		N_THREADS = atoi(argv[3]);
-		if (argc > 4) print_threads = true;
+		if (argc > 4)
+			print_threads = true;
 	}
 
 	if (OPTION == 'a')
@@ -40,20 +41,22 @@ int main(int argc, char **argv)
 	else if (OPTION == 'l')
 		to_print = true;
 
-	// Inicia a contagem do tempo
+	// Inicia a contagem do tempo global
 	gettimeofday(&start_time, NULL);
-
-	// Inicia a contagem de tempos por threads
-	t_timer = omp_get_wtime();
 
 	all_numbers = (char *)calloc(MAX_NUMBER, sizeof(char));
 	all_numbers[0] = all_numbers[1] = 1;
 
 	// Executa algoritimo de Eraclito
-#pragma omp parallel for num_threads(N_THREADS) default(none) private(number, multiple, t_timer, this_thread) shared(all_numbers, MAX_NUMBER, print_threads) \
+	#pragma omp parallel for num_threads(N_THREADS) \
+	default(none) private(number, multiple, t_timer, this_thread) \
+	shared(all_numbers, MAX_NUMBER, print_threads)                \
 	schedule(static, 1)
 	for (number = 2; number < MAX_NUMBER / 2; number++)
 	{
+		// Inicia a contagem de tempos por threads
+		t_timer = omp_get_wtime();
+
 		this_thread = omp_get_thread_num();
 		if (all_numbers[number] == 0)
 		{
@@ -64,8 +67,8 @@ int main(int argc, char **argv)
 		// Imprime o balanco de carga
 		if (print_threads)
 		{
-		printf("Thread:%d number:%lu time:%f\n", this_thread, number, omp_get_wtime() - t_timer);
-		t_timer = omp_get_wtime();
+			printf("Time taken by thread %d is %.8lf computng the number %lu\n",\
+			this_thread, omp_get_wtime() - t_timer, number);
 		}
 	}
 

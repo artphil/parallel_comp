@@ -18,7 +18,7 @@ all : ${BINS}
 
 % : %.cpp
 	@echo "Checking.."
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 run : 
 	$(foreach b, ${BINS}, \
