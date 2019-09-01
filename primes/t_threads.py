@@ -11,6 +11,7 @@ file_out =  open(filename, 'w')
 d_times = {}
 for line in file_in.readlines():
     data = line.split(" ")
+    print (data)
     thread = data[4]
     time = float(data[6])
     number = data[10]
@@ -21,8 +22,8 @@ for line in file_in.readlines():
 
     else:
         d_times[thread] = {}
-        d_times[thread]['time'] += time
-        d_times[thread]['number'] += number
+        d_times[thread]['time'] = time
+        d_times[thread]['number'] = number
 
 
 file_out.write(json.dumps(d_times, indent=True))

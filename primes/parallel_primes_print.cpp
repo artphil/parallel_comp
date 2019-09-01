@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 	bool to_print;
 	bool to_time;
 	bool print_threads;
-	double t_timer;
+	double t_timer, *l_time;
 	struct timeval start_time, end_time;
 
 	// Le argumentos
@@ -47,31 +47,31 @@ int main(int argc, char **argv)
 	all_numbers = (char *)calloc(MAX_NUMBER, sizeof(char));
 	all_numbers[0] = all_numbers[1] = 1;
 
-	// Executa algoritimo de Eraclito
-	#pragma omp parallel for num_threads(N_THREADS) \
-	default(none) private(number, multiple, t_timer, this_thread) \
-	shared(all_numbers, MAX_NUMBER, print_threads)                \
-	schedule(static, 1)
+	l_time = (double *)calloc(N_THREADS, sizeof(double));
+
+// Executa algoritimo de Eraclito
+#pragma omp parallel for num_threads(N_THREADS) default(none) private(number, multiple, t_timer, this_thread) \
+	shared(all_numbers, MAX_NUMBER, print_threads, l_time)                                                    \
+		schedule(static, 1)
 	for (number = 2; number < MAX_NUMBER / 2; number++)
 	{
 		// Inicia a contagem de tempos por threads
-		// t_timer = omp_get_wtime();
+		t_timer = omp_get_wtime();
 
-		// this_thread = omp_get_thread_num();
+		this_thread = omp_get_thread_num();
 		if (all_numbers[number] == 0)
 		{
 			for (multiple = number + number; multiple < MAX_NUMBER; multiple += number)
 				if (all_numbers[multiple] == 0)
 					all_numbers[multiple]++;
 		}
-		/*
 		// Imprime o balanco de carga
-		if (print_threads)
-		{
-			printf("Time taken by thread %d is %.8lf computng the number %lu\n",\
-			this_thread, omp_get_wtime() - t_timer, number);
-		}
-		*/
+		// if (print_threads)
+		// 	{
+		// 		printf("Time taken by thread %d is %.8lf computng the number %lu\n",
+		// 			   this_thread, omp_get_wtime() - t_timer, number);
+		// 	}
+		l_time[this_thread] += omp_get_wtime() - t_timer;
 	}
 
 	// Encerra a contagem do tempo
@@ -90,6 +90,11 @@ int main(int argc, char **argv)
 	// Imprime o tempo
 	if (to_time)
 		printf("%.6f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e6);
+
+	// Imprime o balanco de carga
+	if (print_threads)
+		for (number = 0; number < N_THREADS; number++)
+			printf("Total time of thread %lu is %.8lf\n", number, l_time[number]);
 
 	return 0;
 }
