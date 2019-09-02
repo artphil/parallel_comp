@@ -1,120 +1,18 @@
-parallel_primes_print run 1000000000 t 2 1
-66.518050
-Total time of thread 0 is 15.00417130
-Total time of thread 1 is 55.04731130
-parallel_primes_print 1000000000 t 2 2
-67.909113
-Total time of thread 0 is 14.67215760
-Total time of thread 1 is 56.43549130
-parallel_primes_print 1000000000 t 2 3
-67.042660
-Total time of thread 0 is 14.87582580
-Total time of thread 1 is 55.50723746
-parallel_primes_print 100000000 t 2 1
-5.687975
-Total time of thread 0 is 1.49216950
-Total time of thread 1 is 4.53866522
-parallel_primes_print 100000000 t 2 2
-5.578361
-Total time of thread 0 is 1.44916104
-Total time of thread 1 is 4.42843032
-parallel_primes_print 100000000 t 2 3
-5.602738
-Total time of thread 0 is 1.45481006
-Total time of thread 1 is 4.45381751
-parallel_primes_print 1000000000 t 4 1
-41.835849
-Total time of thread 0 is 9.67096323
-Total time of thread 1 is 31.05590760
-Total time of thread 2 is 6.01455897
-Total time of thread 3 is 30.12576076
-parallel_primes_print 1000000000 t 4 2
-41.692578
-Total time of thread 0 is 9.34601689
-Total time of thread 1 is 30.63213834
-Total time of thread 2 is 5.96732996
-Total time of thread 3 is 29.83440058
-parallel_primes_print 1000000000 t 4 3
-41.946053
-Total time of thread 0 is 9.81962329
-Total time of thread 1 is 30.86177387
-Total time of thread 2 is 6.04698728
-Total time of thread 3 is 30.07085832
-parallel_primes_print 100000000 t 4 1
-3.683996
-Total time of thread 0 is 0.90756563
-Total time of thread 1 is 2.75491554
-Total time of thread 2 is 0.59624515
-Total time of thread 3 is 2.56461931
-parallel_primes_print 100000000 t 4 2
-4.983756
-Total time of thread 0 is 0.94200524
-Total time of thread 1 is 2.56242796
-Total time of thread 2 is 0.58618766
-Total time of thread 3 is 2.52058047
-parallel_primes_print 100000000 t 4 3
-3.908467
-Total time of thread 0 is 0.99809095
-Total time of thread 1 is 2.98246580
-Total time of thread 2 is 1.00763804
-Total time of thread 3 is 2.87916012
-parallel_primes_print 1000000000 t 8 1
-30.477064
-Total time of thread 0 is 8.98648842
-Total time of thread 1 is 21.35167034
-Total time of thread 2 is 3.76109251
-Total time of thread 3 is 21.16220088
-Total time of thread 4 is 8.94790723
-Total time of thread 5 is 20.72411499
-Total time of thread 6 is 3.71942501
-Total time of thread 7 is 20.45109553
-parallel_primes_print 1000000000 t 8 2
-30.631922
-Total time of thread 0 is 9.94229468
-Total time of thread 1 is 21.94567807
-Total time of thread 2 is 10.04397494
-Total time of thread 3 is 21.97195689
-Total time of thread 4 is 5.55655615
-Total time of thread 5 is 22.04979008
-Total time of thread 6 is 5.66762410
-Total time of thread 7 is 21.56367730
-parallel_primes_print 1000000000 t 8 3
-31.859285
-Total time of thread 0 is 9.79561889
-Total time of thread 1 is 21.78120306
-Total time of thread 2 is 6.01322254
-Total time of thread 3 is 21.65778885
-Total time of thread 4 is 5.86375458
-Total time of thread 5 is 21.34018190
-Total time of thread 6 is 5.94201289
-Total time of thread 7 is 21.26212899
-parallel_primes_print 100000000 t 8 1
-3.097529
-Total time of thread 0 is 0.97358768
-Total time of thread 1 is 1.85509221
-Total time of thread 2 is 0.44206049
-Total time of thread 3 is 1.93599648
-Total time of thread 4 is 0.42973974
-Total time of thread 5 is 1.85955299
-Total time of thread 6 is 0.37458712
-Total time of thread 7 is 1.80810403
-parallel_primes_print 100000000 t 8 2
-2.995038
-Total time of thread 0 is 1.01035565
-Total time of thread 1 is 2.16612020
-Total time of thread 2 is 0.59493616
-Total time of thread 3 is 2.20407182
-Total time of thread 4 is 0.66257793
-Total time of thread 5 is 2.11310113
-Total time of thread 6 is 0.63115439
-Total time of thread 7 is 2.09157664
-parallel_primes_print 100000000 t 8 3
-3.069848
-Total time of thread 0 is 1.13373092
-Total time of thread 1 is 2.20663273
-Total time of thread 2 is 1.11863908
-Total time of thread 3 is 2.21808620
-Total time of thread 4 is 1.10694987
-Total time of thread 5 is 1.95732009
-Total time of thread 6 is 0.83337599
-Total time of thread 7 is 2.13892530
+1000000000; p2; 66.518050; thread0; 15.00417130; thread1; 55.04731130
+1000000000; p2; 67.909113; thread0; 14.67215760; thread1; 56.43549130
+1000000000; p2; 67.042660; thread0; 14.87582580; thread1; 55.50723746
+100000000; p2; 5.687975; thread0; 1.49216950; thread1; 4.53866522
+100000000; p2; 5.578361; thread0; 1.44916104; thread1; 4.42843032
+100000000; p2; 5.602738; thread0; 1.45481006; thread1; 4.45381751
+1000000000; p4; 41.835849; thread0; 9.67096323; thread1; 31.05590760; thread2; 6.01455897; thread3; 30.12576076
+1000000000; p4; 41.692578; thread0; 9.34601689; thread1; 30.63213834; thread2; 5.96732996; thread3; 29.83440058
+1000000000; p4; 41.946053; thread0; 9.81962329; thread1; 30.86177387; thread2; 6.04698728; thread3; 30.07085832
+100000000; p4; 3.683996; thread0; 0.90756563; thread1; 2.75491554; thread2; 0.59624515; thread3; 2.56461931
+100000000; p4; 4.983756; thread0; 0.94200524; thread1; 2.56242796; thread2; 0.58618766; thread3; 2.52058047
+100000000; p4; 3.908467; thread0; 0.99809095; thread1; 2.98246580; thread2; 1.00763804; thread3; 2.87916012
+1000000000; p8; 30.477064; thread0; 8.98648842; thread1; 21.35167034; thread2; 3.76109251; thread3; 21.16220088; thread4; 8.94790723; thread5; 20.72411499; thread6; 3.71942501; thread7; 20.45109553
+1000000000; p8; 30.631922; thread0; 9.94229468; thread1; 21.94567807; thread2; 10.04397494; thread3; 21.97195689; thread4; 5.55655615; thread5; 22.04979008; thread6; 5.66762410; thread7; 21.56367730
+1000000000; p8; 31.859285; thread0; 9.79561889; thread1; 21.78120306; thread2; 6.01322254; thread3; 21.65778885; thread4; 5.86375458; thread5; 21.34018190; thread6; 5.94201289; thread7; 21.26212899
+100000000; p8; 3.097529; thread0; 0.97358768; thread1; 1.85509221; thread2; 0.44206049; thread3; 1.93599648; thread4; 0.42973974; thread5; 1.85955299; thread6; 0.37458712; thread7; 1.80810403
+100000000; p8; 2.995038; thread0; 1.01035565; thread1; 2.16612020; thread2; 0.59493616; thread3; 2.20407182; thread4; 0.66257793; thread5; 2.11310113; thread6; 0.63115439; thread7; 2.09157664
+100000000; p8; 3.069848; thread0; 1.13373092; thread1; 2.20663273; thread2; 1.11863908; thread3; 2.21808620; thread4; 1.10694987; thread5; 1.95732009; thread6; 0.83337599; thread7; 2.13892530
