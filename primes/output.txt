@@ -1,0 +1,120 @@
+parallel_primes_print run 1000000000 t 2 1
+66.518050
+Total time of thread 0 is 15.00417130
+Total time of thread 1 is 55.04731130
+parallel_primes_print 1000000000 t 2 2
+67.909113
+Total time of thread 0 is 14.67215760
+Total time of thread 1 is 56.43549130
+parallel_primes_print 1000000000 t 2 3
+67.042660
+Total time of thread 0 is 14.87582580
+Total time of thread 1 is 55.50723746
+parallel_primes_print 100000000 t 2 1
+5.687975
+Total time of thread 0 is 1.49216950
+Total time of thread 1 is 4.53866522
+parallel_primes_print 100000000 t 2 2
+5.578361
+Total time of thread 0 is 1.44916104
+Total time of thread 1 is 4.42843032
+parallel_primes_print 100000000 t 2 3
+5.602738
+Total time of thread 0 is 1.45481006
+Total time of thread 1 is 4.45381751
+parallel_primes_print 1000000000 t 4 1
+41.835849
+Total time of thread 0 is 9.67096323
+Total time of thread 1 is 31.05590760
+Total time of thread 2 is 6.01455897
+Total time of thread 3 is 30.12576076
+parallel_primes_print 1000000000 t 4 2
+41.692578
+Total time of thread 0 is 9.34601689
+Total time of thread 1 is 30.63213834
+Total time of thread 2 is 5.96732996
+Total time of thread 3 is 29.83440058
+parallel_primes_print 1000000000 t 4 3
+41.946053
+Total time of thread 0 is 9.81962329
+Total time of thread 1 is 30.86177387
+Total time of thread 2 is 6.04698728
+Total time of thread 3 is 30.07085832
+parallel_primes_print 100000000 t 4 1
+3.683996
+Total time of thread 0 is 0.90756563
+Total time of thread 1 is 2.75491554
+Total time of thread 2 is 0.59624515
+Total time of thread 3 is 2.56461931
+parallel_primes_print 100000000 t 4 2
+4.983756
+Total time of thread 0 is 0.94200524
+Total time of thread 1 is 2.56242796
+Total time of thread 2 is 0.58618766
+Total time of thread 3 is 2.52058047
+parallel_primes_print 100000000 t 4 3
+3.908467
+Total time of thread 0 is 0.99809095
+Total time of thread 1 is 2.98246580
+Total time of thread 2 is 1.00763804
+Total time of thread 3 is 2.87916012
+parallel_primes_print 1000000000 t 8 1
+30.477064
+Total time of thread 0 is 8.98648842
+Total time of thread 1 is 21.35167034
+Total time of thread 2 is 3.76109251
+Total time of thread 3 is 21.16220088
+Total time of thread 4 is 8.94790723
+Total time of thread 5 is 20.72411499
+Total time of thread 6 is 3.71942501
+Total time of thread 7 is 20.45109553
+parallel_primes_print 1000000000 t 8 2
+30.631922
+Total time of thread 0 is 9.94229468
+Total time of thread 1 is 21.94567807
+Total time of thread 2 is 10.04397494
+Total time of thread 3 is 21.97195689
+Total time of thread 4 is 5.55655615
+Total time of thread 5 is 22.04979008
+Total time of thread 6 is 5.66762410
+Total time of thread 7 is 21.56367730
+parallel_primes_print 1000000000 t 8 3
+31.859285
+Total time of thread 0 is 9.79561889
+Total time of thread 1 is 21.78120306
+Total time of thread 2 is 6.01322254
+Total time of thread 3 is 21.65778885
+Total time of thread 4 is 5.86375458
+Total time of thread 5 is 21.34018190
+Total time of thread 6 is 5.94201289
+Total time of thread 7 is 21.26212899
+parallel_primes_print 100000000 t 8 1
+3.097529
+Total time of thread 0 is 0.97358768
+Total time of thread 1 is 1.85509221
+Total time of thread 2 is 0.44206049
+Total time of thread 3 is 1.93599648
+Total time of thread 4 is 0.42973974
+Total time of thread 5 is 1.85955299
+Total time of thread 6 is 0.37458712
+Total time of thread 7 is 1.80810403
+parallel_primes_print 100000000 t 8 2
+2.995038
+Total time of thread 0 is 1.01035565
+Total time of thread 1 is 2.16612020
+Total time of thread 2 is 0.59493616
+Total time of thread 3 is 2.20407182
+Total time of thread 4 is 0.66257793
+Total time of thread 5 is 2.11310113
+Total time of thread 6 is 0.63115439
+Total time of thread 7 is 2.09157664
+parallel_primes_print 100000000 t 8 3
+3.069848
+Total time of thread 0 is 1.13373092
+Total time of thread 1 is 2.20663273
+Total time of thread 2 is 1.11863908
+Total time of thread 3 is 2.21808620
+Total time of thread 4 is 1.10694987
+Total time of thread 5 is 1.95732009
+Total time of thread 6 is 0.83337599
+Total time of thread 7 is 2.13892530
