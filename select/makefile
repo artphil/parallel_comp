@@ -1,10 +1,10 @@
 
-CC = gcc
+CC = g++
 CFLAGS = -g -Wall 
 Vflags = valgrind --leak-check=full
 
-SRCS := $(wildcard *.c)
-BINS := $(SRCS:%.c=%)
+SRCS := $(wildcard *.cpp)
+BINS := $(SRCS:%.cpp=%)
 
 # If the first argument is "run"...
 ifeq (run,$(firstword $(MAKECMDGOALS)))
