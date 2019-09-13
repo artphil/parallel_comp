@@ -72,10 +72,11 @@ int main(int argc, char **argv)
 	char OPTION;
 	int TARGET;
 	int *data;
-	char *checked;
 	int number, aux;
 	bool to_print, to_time;
 	clock_t start_time, end_time;
+
+	srand(time(NULL));
 
 	// Le argumentos
 	if (argc < 5)
@@ -105,21 +106,15 @@ int main(int argc, char **argv)
 
 	// Aloca memoria
 	data = (int *)malloc(DATA_LENGTH * sizeof(int));
-	checked = (char *)calloc(DATA_LENGTH, sizeof(char));
 
-	// Inicia vetor com numeros aleatorios de 1 a N
+	// Inicia vetor com numeros aleatorios de 1 a OO
+	aux = 1;
 	for (number = 0; number < DATA_LENGTH; number++)
 	{
-		aux = rand() % DATA_LENGTH;
-		while (checked[aux])
-			aux = rand() % DATA_LENGTH;
-
-		checked[aux] = 1;
-		data[number] = aux + 1;
+		aux += rand() % 10;
+		data[number] = aux; 
 	}
-
-	// libera memoria não utilizada
-	free(checked);
+	shuffle(data,DATA_LENGTH);
 
 	// Seleciona iesimo numero
 	number = select(data, 0, DATA_LENGTH - 1, TARGET);
