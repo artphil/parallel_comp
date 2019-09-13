@@ -3,7 +3,7 @@
 #include <ctime>
 
 // Troca dois elementos de lugar no vetor
-void trade(int *V, int x, int y)
+void swap(int *V, int x, int y)
 {
 	int aux;
 
@@ -15,6 +15,12 @@ void trade(int *V, int x, int y)
 	}
 }
 
+void shuffle(int *V, int n)
+{
+	for (int i = 0; i < n; i++)
+		swap(V, i, rand() % n);
+}
+
 // Cria duas particoes com numeros maiores e menores que o pivor
 int partition(int *A, int first, int last)
 {
@@ -23,19 +29,19 @@ int partition(int *A, int first, int last)
 	i = first - 1;
 	j = first + (rand() % (last - first));
 	pivot = A[j];
-	trade(A, j, last);
+	swap(A, j, last);
 
 	for (j = first; j < last; j++)
 	{
 		if (A[j] <= pivot)
 		{
 			i++;
-			trade(A, i, j);
+			swap(A, i, j);
 		}
 	}
 
 	i++;
-	trade(A, i, last);
+	swap(A, i, last);
 
 	return i;
 }
@@ -99,7 +105,7 @@ int main(int argc, char **argv)
 
 	// Aloca memoria
 	data = (int *)malloc(DATA_LENGTH * sizeof(int));
-	checked = (char *)malloc(DATA_LENGTH * sizeof(char));
+	checked = (char *)calloc(DATA_LENGTH, sizeof(char));
 
 	// Inicia vetor com numeros aleatorios de 1 a N
 	for (number = 0; number < DATA_LENGTH; number++)
@@ -109,7 +115,7 @@ int main(int argc, char **argv)
 			aux = rand() % DATA_LENGTH;
 
 		checked[aux] = 1;
-		data[number] = aux+1;
+		data[number] = aux + 1;
 	}
 
 	// libera memoria não utilizada
@@ -127,7 +133,7 @@ int main(int argc, char **argv)
 		for (aux = 0; aux < DATA_LENGTH; aux++)
 			printf("%d ", data[aux]);
 		printf("\n");
-		
+
 		printf("%d \n", number);
 	}
 	// Imprime o tempo
