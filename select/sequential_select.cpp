@@ -21,13 +21,22 @@ void shuffle(int *V, int n)
 		swap(V, i, rand() % n);
 }
 
+void pprint(int *V, char name, int start, int end)
+{
+	printf("%c = ", name);
+	for (int i = start; i < end; i++)
+		printf("%d ", (V)[i]);
+	printf("\n");
+}
+
 // Cria duas particoes com numeros maiores e menores que o pivor
 int partition(int *A, int first, int last)
 {
 	int i, j, pivot;
+	int size = last - first + 1;
 
 	i = first - 1;
-	j = first + (rand() % (last - first));
+	j = first + (rand() % size);
 	pivot = A[j];
 	swap(A, j, last);
 
@@ -50,6 +59,8 @@ int partition(int *A, int first, int last)
 int select(int *A, int first, int last, int number)
 {
 	int q, k;
+	// pprint(A, 'A', first, last + 1);
+	// printf("\n");
 
 	if (first == last)
 		return A[first];
@@ -79,7 +90,7 @@ int main(int argc, char **argv)
 	srand(time(NULL));
 
 	// Le argumentos
-	if (argc < 5)
+	if (argc < 4)
 	{
 		printf("Numero de agrumentos invalido\n");
 		return 1;
@@ -88,7 +99,7 @@ int main(int argc, char **argv)
 	{
 		DATA_LENGTH = atoi(argv[1]);
 		TARGET = atoi(argv[2]);
-		OPTION = argv[4][0];
+		OPTION = argv[3][0];
 	}
 
 	// Identifica de impressao
@@ -108,10 +119,10 @@ int main(int argc, char **argv)
 	data = (int *)malloc(DATA_LENGTH * sizeof(int));
 
 	// Inicia vetor com numeros aleatorios de 1 a OO
-	aux = 1;
+	aux = 0;
 	for (number = 0; number < DATA_LENGTH; number++)
 	{
-		aux += rand() % 10;
+		aux += 1 + (rand() % 10);
 		data[number] = aux; 
 	}
 	shuffle(data,DATA_LENGTH);

@@ -3,7 +3,7 @@
 #include <ctime>
 
 // Troca dois elementos de lugar no vetor
-void trade(int *V, int x, int y)
+void swap(int *V, int x, int y)
 {
 	int aux;
 
@@ -15,11 +15,29 @@ void trade(int *V, int x, int y)
 	}
 }
 
+void shuffle(int *V, int n)
+{
+	for (int i = 0; i < n; i++)
+		swap(V, i, rand() % n);
+}
+
 // Checa se numero eh maior ou menor que pivot e registra no vetor de bits
-void set_bit(int *V, int *check_array, int pivot, int index, int floor)
+void set_bit(int *V, int *L_array, int *R_array, int pivot, int index, int floor)
 {
 	if (V[index] < pivot)
-		check_array[index - floor] = 1;
+	{
+		L_array[index - floor] = 1;
+	}
+	else
+	{
+		R_array[index - floor] = 1;
+	}
+}
+
+// Insere valor no novo vetor
+void set_value(int *OLD, int *NEW, int old_index, int new_index)
+{
+	NEW[new_index] = OLD[old_index];
 }
 
 // Cria vetor de zeros
@@ -31,44 +49,95 @@ int *new_array(int size)
 // calcula vetor de somas
 int bit_sum(int *check_array, int *sum_array, int size)
 {
-	for (size_t i = 1; i < size; i++)
+	sum_array[0] = check_array[0];
+	for (int i = 1; i < size; i++)
 	{
-		sum_array[i] = check_array[i - 1] + check_array[i];
+		sum_array[i] = sum_array[i - 1] + check_array[i];
 	}
 
 	return sum_array[size - 1];
+}
+
+void pprint(int *V, char name, int start, int end)
+{
+	printf("%c = ", name);
+	for (int i = start; i < end; i++)
+		printf("%d ", (V)[i]);
+	printf("\n");
 }
 
 // Cria duas particoes com numeros maiores e menores que o pivor
 int partition(int *A, int first, int last)
 {
 	int i, j, pivot;
-	int *bit_L_array = new_array(last - first + 1);
-	int *bit_R_array = new_array(last - first + 1);
-	int *sum_array = new_array(last - first + 1);
+	int size = (last - first) + 1;
+
+	int *array_new = (int *)malloc(size * sizeof(int));
+
+	int *bit_L_array = new_array(size);
+	int *bit_R_array = new_array(size);
+	int *sum_L_array = (int *)malloc(size * sizeof(int));
+	int *sum_R_array = (int *)malloc(size * sizeof(int));
 
 	i = first - 1;
-	j = first + (rand() % (last - first));
+	j = first + (rand() % size - 1);
 	pivot = A[j];
-	trade(A, j, last);
+	swap(A, j, last);
 
+	// pprint(A, 'A', first, last + 1);
+	// pprint(bit_L_array, 'L', 0, size);
+	// pprint(sum_L_array, 'l', 0, size);
+	// pprint(bit_R_array, 'R', 0, size);
+	// pprint(sum_R_array, 'r', 0, size);
+	// printf("\n");
+	// getchar();
 
-	for (j = first; j < last; j++)
+	for (j = first; j < last; j++) 								///// PARALELIZAR
 	{
-		set_bit(A, bit_L_array, pivot, j, first); 			///// PARALELIZAR
-		set_bit(A, bit_R_array, pivot, j, first); 			///// PARALELIZAR
-		// if (A[j] <= pivot)
-		// {
-		// 	i++;
-		// 	trade(A, i, j);
-		// }
+		set_bit(A, bit_L_array, bit_R_array, pivot, j, first);
+	}
+																// Join
+	i = bit_sum(bit_L_array, sum_L_array, size);
+	bit_sum(bit_R_array, sum_R_array, size);
+
+	for (j = first; j < last; j++) 								///// PARALELIZAR
+	{
+		if (bit_L_array[j - first])
+			set_value(A, array_new, j, sum_L_array[j - first] - 1);
+
+		else
+			set_value(A, array_new, j, i + sum_R_array[j - first]);
+
+		// printf("%2d %2d | %2d %2d | %2d %2d \n", 
+		// j, 
+		// A[j], 
+		// bit_L_array[j - first], 
+		// sum_L_array[j - first], 
+		// bit_R_array[j - first], 
+		// sum_R_array[j - first]);
 	}
 
+	set_value(A, array_new, last, i);
 
-	i++;
-	trade(A, i, last);
+																		// Join
+	for (j = first; j <= last; j++)
+		A[j] = array_new[j - first];
 
-	return i;
+	// pprint(A, 'A', first, last + 1);
+	// pprint(bit_L_array, 'L', 0, size);
+	// pprint(sum_L_array, 'l', 0, size);
+	// pprint(bit_R_array, 'R', 0, size);
+	// pprint(sum_R_array, 'r', 0, size);
+	// printf("\ni = %d \n", i);
+	// getchar();
+
+	// free(array_new);
+	// free(bit_L_array);
+	// free(bit_R_array);
+	// free(sum_L_array);
+	// free(sum_R_array);
+
+	return first+i;
 }
 
 // Seleciona o iesimo numero do vetor
@@ -96,6 +165,7 @@ int main(int argc, char **argv)
 	int DATA_LENGTH;
 	char OPTION;
 	int TARGET;
+	int N_THREADS;
 	int *data;
 	char *checked;
 	int number, aux;
@@ -112,7 +182,8 @@ int main(int argc, char **argv)
 	{
 		DATA_LENGTH = atoi(argv[1]);
 		TARGET = atoi(argv[2]);
-		OPTION = argv[4][0];
+		OPTION = argv[3][0];
+		N_THREADS = atoi(argv[4]);
 	}
 
 	// Identifica de impressao
@@ -132,17 +203,14 @@ int main(int argc, char **argv)
 	data = (int *)malloc(DATA_LENGTH * sizeof(int));
 	checked = (char *)malloc(DATA_LENGTH * sizeof(char));
 
-	// Inicia vetor com numeros aleatorios de 1 a N
+	// Inicia vetor com numeros aleatorios de 1 a OO
+	aux = 0;
 	for (number = 0; number < DATA_LENGTH; number++)
 	{
-		aux = rand() % DATA_LENGTH;
-		while (checked[aux])
-			aux = rand() % DATA_LENGTH;
-
-		checked[aux] = 1;
-		data[number] = aux + 1;
+		aux += 1 + (rand() % 10);
+		data[number] = aux;
 	}
-
+	shuffle(data, DATA_LENGTH);
 	// libera memoria não utilizada
 	free(checked);
 
