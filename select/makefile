@@ -1,6 +1,6 @@
 
 CC = g++
-CFLAGS = -g -Wall 
+CFLAGS = -g -Wall -lpthread 
 Vflags = valgrind --leak-check=full
 
 SRCS := $(wildcard *.cpp)
@@ -18,7 +18,7 @@ all : ${BINS}
 
 % : %.cpp
 	@echo "Checking.."
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $^ -o $@ $(CFLAGS) 
 
 run : 
 	$(foreach b, ${BINS}, \

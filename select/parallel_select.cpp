@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <pthread.h>
+#include "thpool.h"
 
 // Troca dois elementos de lugar no vetor
 void swap(int *V, int x, int y)
@@ -21,24 +23,41 @@ void shuffle(int *V, int n)
 		swap(V, i, rand() % n);
 }
 
-// Checa se numero eh maior ou menor que pivot e registra no vetor de bits
-void set_bit(int *V, int *L_array, int *R_array, int pivot, int index, int floor)
+typedef 
+struct t_data
 {
-	if (V[index] < pivot)
+	int *V;
+	int *L;
+	int *L_sum;
+	int *R;
+	int *R_sum;
+	int pivot;
+	int index;
+	int start;
+	int end;
+}
+t_data;
+
+
+// Checa se numero eh maior ou menor que pivot e registra no vetor de bits
+// void set_bit(int *V, int *L_array, int *R_array, int pivot, int index, int floor)
+void set_bit(t_data data)
+{
+	// t_data *data = (t_data*) args;
+
+	// if (V[index] < pivot)
+	if (data.V[data.index] < data.pivot)
 	{
-		L_array[index - floor] = 1;
+		// L_array[index - floor] = 1;
+		data.L[data.index - data.start] = 1;
 	}
 	else
 	{
-		R_array[index - floor] = 1;
+		// R_array[index - floor] = 1;
+		data.L[data.index - data.start] = 1;
 	}
 }
 
-// Insere valor no novo vetor
-void set_value(int *OLD, int *NEW, int old_index, int new_index)
-{
-	NEW[new_index] = OLD[old_index];
-}
 
 // Cria vetor de zeros
 int *new_array(int size)
@@ -47,16 +66,18 @@ int *new_array(int size)
 }
 
 // calcula vetor de somas
-int bit_sum(int *check_array, int *sum_array, int size)
+int *soma_prefixos(t_data *data, int size)
 {
-	sum_array[0] = check_array[0];
+	data->L_sum[0] = data->L[0];
+	data->R_sum[0] = data->R[0];
+
 	for (int i = 1; i < size; i++)
 	{
-		sum_array[i] = sum_array[i - 1] + check_array[i];
+		data->L_sum[i] = data->L_sum[i-1] + data->L[i];
+		data->R_sum[i] = data->R_sum[i-1] + data->R[i];
 	}
+}	
 
-	return sum_array[size - 1];
-}
 
 void pprint(int *V, char name, int start, int end)
 {
@@ -66,11 +87,64 @@ void pprint(int *V, char name, int start, int end)
 	printf("\n");
 }
 
+
+typedef 
+struct particoes
+{
+	int *V;
+	int *L;
+	int *R;
+	int *L_sum;
+	int *R_sum;
+	int *L_part;
+	int *R_part;
+	int L_size;
+	int R_size;
+	int side;
+	int swap_index;
+}
+particoes;
+
+particoes aloca_particao(t_data data, int size)
+{
+	int size_L = data.L_sum[size-1];
+	int size_R = data.R_sum[size-1];
+
+	particoes aux;
+
+	aux.V = data.V;
+	aux.L = data.L;
+	aux.L_sum = data.L_sum;
+	aux.R = data.R;
+	aux.R_sum = data.R_sum;
+	
+	aux.L_size = size_L;
+	aux.R_size = size_R;
+
+
+    aux.L_part = (int *)malloc(size_L *sizeof(int));
+    aux.R_part = (int *)malloc(size_R *sizeof(int));
+
+	return aux;
+	
+}
+
+void add_to_partition(particoes data)
+{	
+	if(data.side == 0)
+	{	// Partition index from PrefixSum, value from original vector
+		data.L_part[data.L_sum[data.swap_index]] = data.V[data.swap_index]; 
+	}
+	else
+	{
+		data.R_part[data.R_sum[data.swap_index]] = data.V[data.swap_index];  
+	}
+}
+
 // Cria duas particoes com numeros maiores e menores que o pivor
-int partition(int *A, int first, int last)
+particoes *partition(int *A, int size, int result_index, threadpool* threads)
 {
 	int i, j, pivot;
-	int size = (last - first) + 1;
 
 	int *array_new = (int *)malloc(size * sizeof(int));
 
@@ -79,85 +153,118 @@ int partition(int *A, int first, int last)
 	int *sum_L_array = (int *)malloc(size * sizeof(int));
 	int *sum_R_array = (int *)malloc(size * sizeof(int));
 
-	i = first - 1;
-	j = first + (rand() % size - 1);
+	t_data *arg_bit = (t_data *) malloc(size * sizeof(t_data));
+	
+	/*
+		1 - escolhe pivo
+	*/
+
+	j = (rand() % size - 1);
 	pivot = A[j];
-	swap(A, j, last);
+	swap(A, j, size - 1);
 
-	// pprint(A, 'A', first, last + 1);
-	// pprint(bit_L_array, 'L', 0, size);
-	// pprint(sum_L_array, 'l', 0, size);
-	// pprint(bit_R_array, 'R', 0, size);
-	// pprint(sum_R_array, 'r', 0, size);
-	// printf("\n");
-	// getchar();
+		
+	/*
+		2 - ADD jobs -> set valores no vetor binario
+	*/
 
-	for (j = first; j < last; j++) 								///// PARALELIZAR
+	for (j = 0; j < size-1; j++) 					
 	{
-		set_bit(A, bit_L_array, bit_R_array, pivot, j, first);
-	}
-																// Join
-	i = bit_sum(bit_L_array, sum_L_array, size);
-	bit_sum(bit_R_array, sum_R_array, size);
+		arg_bit[j].V = A;
+		
+		arg_bit[j].L = bit_L_array;
+		arg_bit[j].L_sum = sum_L_array;
+		
+		arg_bit[j].R = bit_R_array;
+		arg_bit[j].R_sum = sum_R_array;
 
-	for (j = first; j < last; j++) 								///// PARALELIZAR
+		arg_bit[j].index = j;
+		arg_bit[j].pivot = pivot;
+		
+		arg_bit[j].start = 0;
+		arg_bit[j].end = size-1;
+		
+		thpool_add_work(*threads, (void *)set_bit, (void*) arg_bit+j);		
+	}
+		
+	thpool_wait(*threads);
+	
+	/*
+	3 - somar L e R
+	*/
+	soma_prefixos(&arg_bit[0], size);
+
+
+	/*
+
+		4 - ADD jobs 
+			-> Preenche vetores auxiliares -> if vetor bin L = 0 -> preenche A[i] no R, else no L.
+
+	*/
+	particoes *result = (particoes*)malloc(size*sizeof(particoes));
+	
+	for(int h = 0; h < size;h++)
 	{
-		if (bit_L_array[j - first])
-			set_value(A, array_new, j, sum_L_array[j - first] - 1);
+		result[h] = aloca_particao(arg_bit[0], size);
+		result[h].swap_index = h;
+	}
+	
+	for(int h = 0; h < result->L_size; h++)
+	{
+		if(result->L[h] == 1)
+		{
+			result[h].side = 0; // determina a particao (left = 0 or right = 1)
+			thpool_add_work(*threads, (void *) add_to_partition(result[h]), (void *) result)
+		}
 
-		else
-			set_value(A, array_new, j, i + sum_R_array[j - first]);
+		else if(result->R[h] == 1)
+		{
+			result[h].side = 1;
+			thpool_add_work(*threads, (void *) add_to_partition(result[h]), (void *) result)
+		}
+	}
+	
+	
 
-		// printf("%2d %2d | %2d %2d | %2d %2d \n", 
-		// j, 
-		// A[j], 
-		// bit_L_array[j - first], 
-		// sum_L_array[j - first], 
-		// bit_R_array[j - first], 
-		// sum_R_array[j - first]);
+	// TODO: REFATORAR E ADD FREEs
+	for(int h = 0; h < size; h++)
+	{
+		free(arg_bit[h]);
 	}
 
-	set_value(A, array_new, last, i);
 
-																		// Join
-	for (j = first; j <= last; j++)
-		A[j] = array_new[j - first];
-
-	// pprint(A, 'A', first, last + 1);
-	// pprint(bit_L_array, 'L', 0, size);
-	// pprint(sum_L_array, 'l', 0, size);
-	// pprint(bit_R_array, 'R', 0, size);
-	// pprint(sum_R_array, 'r', 0, size);
-	// printf("\ni = %d \n", i);
-	// getchar();
-
-	// free(array_new);
-	// free(bit_L_array);
-	// free(bit_R_array);
-	// free(sum_L_array);
-	// free(sum_R_array);
-
-	return first+i;
+	return result;
 }
 
 // Seleciona o iesimo numero do vetor
-int select(int *A, int first, int last, int number)
+int select(int *A, int size, int number, threadpool* t)
 {
 	int q, k;
+	particoes *parts;
 
-	if (first == last)
-		return A[first];
+	if (size == 1)
+		return A[0];
 
-	q = partition(A, first, last);
+	parts = partition(A, size, number, t);
 
-	k = q - first + 1;
-
-	if (number == k)
-		return A[q];
-	else if (number < k)
-		return select(A, first, q - 1, number);
+	// k = q - first + 1;
+	if (parts->L_size == number-1)
+	 	return parts->R_part[0];
+	
+	else if (parts->L_size > number)
+	{
+		A = parts->L_part;
+		size = parts->L_size;
+		free(parts);
+		return select(A, size, number, t);
+	}
 	else
-		return select(A, q + 1, last, number - k);
+	{
+		A = parts->R_part;
+		size = parts->R_size;
+		free(parts);
+		return select(A, size, number - parts->L_size - 1, t);
+	}
 }
 
 int main(int argc, char **argv)
@@ -171,7 +278,7 @@ int main(int argc, char **argv)
 	int number, aux;
 	bool to_print, to_time;
 	clock_t start_time, end_time;
-
+	threadpool thpool;                     //Pool de threads
 	// Le argumentos
 	if (argc < 5)
 	{
@@ -201,7 +308,9 @@ int main(int argc, char **argv)
 
 	// Aloca memoria
 	data = (int *)malloc(DATA_LENGTH * sizeof(int));
-	checked = (char *)malloc(DATA_LENGTH * sizeof(char));
+    
+	// Inicializa pool de Threads
+	thpool = thpool_init(N_THREADS);  
 
 	// Inicia vetor com numeros aleatorios de 1 a OO
 	aux = 0;
@@ -211,11 +320,9 @@ int main(int argc, char **argv)
 		data[number] = aux;
 	}
 	shuffle(data, DATA_LENGTH);
-	// libera memoria não utilizada
-	free(checked);
 
 	// Seleciona iesimo numero
-	number = select(data, 0, DATA_LENGTH - 1, TARGET);
+	number = select(data, DATA_LENGTH, TARGET, thpool);
 
 	// Encerra a contagem do tempo
 	end_time = clock();
