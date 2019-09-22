@@ -1,24 +1,29 @@
 
 CC = g++
-CFLAGS = -g -Wall -lpthread 
+CFLAGS = -Wall 
+TFLAGS = -lpthread 
 Vflags = valgrind --leak-check=full
 
-SRCS := $(wildcard *.cpp)
-BINS := $(SRCS:%.cpp=%)
-
-# If the first argument is "run"...
-ifeq (run,$(firstword $(MAKECMDGOALS)))
-  # use the rest as arguments for "run"
-  RUN_ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
-  # ...and turn them into do-nothing targets
-  $(eval $(RUN_ARGS):;@:)
-endif
+SRCS = sequential_select.cpp parallel_select.cpp 
+BINS = sequential_select parallel_select
 
 all : ${BINS}
 
-% : %.cpp
+sequential_select : sequential_select.cpp
 	@echo "Checking.."
-	$(CC) $^ -o $@ $(CFLAGS) 
+	$(CC) $(CFLAGS) -g sequential_select.cpp -o sequential_select 
+
+parallel_select : parallel_select.o thpool.o
+	@echo "Checking.."
+	$(CC) $(CFLAGS) $(TFLAGS) -g parallel_select.o thpool.o -o parallel_select 
+
+parallel_select.o : parallel_select.cpp
+	@echo "Checking.."
+	$(CC) $(CFLAGS) $(TFLAGS) -c parallel_select.cpp
+
+thpool.o : thpool.cpp
+	@echo "Checking.."
+	$(CC) $(CFLAGS) $(TFLAGS) -c thpool.cpp
 
 run : 
 	$(foreach b, ${BINS}, \

@@ -40,21 +40,17 @@ t_data;
 
 
 // Checa se numero eh maior ou menor que pivot e registra no vetor de bits
-// void set_bit(int *V, int *L_array, int *R_array, int pivot, int index, int floor)
-void set_bit(t_data data)
+void set_bit(void *args)
 {
-	// t_data *data = (t_data*) args;
+	t_data *data = (t_data*) args;
 
-	// if (V[index] < pivot)
-	if (data.V[data.index] < data.pivot)
+	if (data->V[data->index] < data->pivot)
 	{
-		// L_array[index - floor] = 1;
-		data.L[data.index - data.start] = 1;
+		data->L[data->index - data->start] = 1;
 	}
 	else
 	{
-		// R_array[index - floor] = 1;
-		data.L[data.index - data.start] = 1;
+		data->L[data->index - data->start] = 1;
 	}
 }
 
@@ -129,15 +125,16 @@ particoes aloca_particao(t_data data, int size)
 	
 }
 
-void add_to_partition(particoes data)
+void add_to_partition(void *arg)
 {	
-	if(data.side == 0)
+	particoes *data = (particoes*) arg;
+	if(data->side == 0)
 	{	// Partition index from PrefixSum, value from original vector
-		data.L_part[data.L_sum[data.swap_index]] = data.V[data.swap_index]; 
+		data->L_part[ data->L_sum[ data->swap_index ] ] = data->V[ data->swap_index ]; 
 	}
 	else
 	{
-		data.R_part[data.R_sum[data.swap_index]] = data.V[data.swap_index];  
+		data->R_part[ data->R_sum[ data->swap_index ] ] = data->V[ data->swap_index ];  
 	}
 }
 
@@ -158,7 +155,6 @@ particoes *partition(int *A, int size, int result_index, threadpool* threads)
 	/*
 		1 - escolhe pivo
 	*/
-
 	j = (rand() % size - 1);
 	pivot = A[j];
 	swap(A, j, size - 1);
@@ -167,7 +163,6 @@ particoes *partition(int *A, int size, int result_index, threadpool* threads)
 	/*
 		2 - ADD jobs -> set valores no vetor binario
 	*/
-
 	for (j = 0; j < size-1; j++) 					
 	{
 		arg_bit[j].V = A;
@@ -184,9 +179,11 @@ particoes *partition(int *A, int size, int result_index, threadpool* threads)
 		arg_bit[j].start = 0;
 		arg_bit[j].end = size-1;
 		
-		thpool_add_work(*threads, (void *)set_bit, (void*) arg_bit+j);		
+		// Adciona tarefa para a pool de threads
+		thpool_add_work(*threads, &set_bit, (void*) &(arg_bit[j]));		
 	}
-		
+	
+	// Espera todas as tarefas serem completadas
 	thpool_wait(*threads);
 	
 	/*
@@ -209,28 +206,26 @@ particoes *partition(int *A, int size, int result_index, threadpool* threads)
 		result[h].swap_index = h;
 	}
 	
-	for(int h = 0; h < result->L_size; h++)
+	for(int h = 0; h < size; h++)
 	{
 		if(result->L[h] == 1)
 		{
 			result[h].side = 0; // determina a particao (left = 0 or right = 1)
-			thpool_add_work(*threads, (void *) add_to_partition(result[h]), (void *) result)
+			thpool_add_work(*threads, &add_to_partition, (void *) result);
 		}
 
 		else if(result->R[h] == 1)
 		{
 			result[h].side = 1;
-			thpool_add_work(*threads, (void *) add_to_partition(result[h]), (void *) result)
+			thpool_add_work(*threads, &add_to_partition, (void *) result);
 		}
 	}
 	
 	
 
 	// TODO: REFATORAR E ADD FREEs
-	for(int h = 0; h < size; h++)
-	{
-		free(arg_bit[h]);
-	}
+	free(arg_bit);
+	
 
 
 	return result;
@@ -322,7 +317,7 @@ int main(int argc, char **argv)
 	shuffle(data, DATA_LENGTH);
 
 	// Seleciona iesimo numero
-	number = select(data, DATA_LENGTH, TARGET, thpool);
+	number = select(data, DATA_LENGTH, TARGET, &thpool);
 
 	// Encerra a contagem do tempo
 	end_time = clock();
