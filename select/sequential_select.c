@@ -1,6 +1,6 @@
-#include <cstdio>
-#include <cstdlib>
-#include <ctime>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 // Troca dois elementos de lugar no vetor
 void swap(int *V, int x, int y)
@@ -56,7 +56,7 @@ int partition(int *A, int first, int last)
 }
 
 // Seleciona o iesimo numero do vetor
-int select(int *A, int first, int last, int number)
+int rand_select(int *A, int first, int last, int number)
 {
 	int q, k;
 	// pprint(A, 'A', first, last + 1);
@@ -72,9 +72,9 @@ int select(int *A, int first, int last, int number)
 	if (number == k)
 		return A[q];
 	else if (number < k)
-		return select(A, first, q - 1, number);
+		return rand_select(A, first, q - 1, number);
 	else
-		return select(A, q + 1, last, number - k);
+		return rand_select(A, q + 1, last, number - k);
 }
 
 int main(int argc, char **argv)
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	int TARGET;
 	int *data;
 	int number, aux;
-	bool to_print, to_time;
+	char to_print, to_time;
 	clock_t start_time, end_time;
 
 	srand(time(NULL));
@@ -103,14 +103,14 @@ int main(int argc, char **argv)
 	}
 
 	// Identifica de impressao
-	to_print = to_time = false;
+	to_print = to_time = 0;
 
 	if (OPTION == 'a')
-		to_print = to_time = true;
+		to_print = to_time = 1;
 	else if (OPTION == 't')
-		to_time = true;
+		to_time = 1;
 	else if (OPTION == 'l')
-		to_print = true;
+		to_print = 1;
 
 	// Inicia a contagem do tempo
 	start_time = clock();
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 	shuffle(data,DATA_LENGTH);
 
 	// Seleciona iesimo numero
-	number = select(data, 0, DATA_LENGTH - 1, TARGET);
+	number = rand_select(data, 0, DATA_LENGTH - 1, TARGET);
 
 	// Encerra a contagem do tempo
 	end_time = clock();

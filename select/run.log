@@ -1,0 +1,186 @@
+Original:
+A: 35 45 55 29 57 42 25 4 19 11 
+size: 10
+k position: 4
+
+Before partition:
+A: 35 45 55 29 57 42 25 4 19 11 
+Criando Job
+Job: 1
+Criando Job
+Job: 1
+Criando Job
+Job: 1
+Criando Job
+Job: 1
+Criando Job
+Job: 1
+Criando Job
+Job: 1
+Criando Job
+Job: 1
+Criando Job
+Job: 1
+Criando Job
+Job: 1
+ARG_BIT PRINTS: 
+A: 11 45 55 29 57 42 25 4 19 35 
+L: 0 0 0 0 0 0 0 0 0 0 
+L_sum: 0 0 0 0 0 0 0 0 0 0 
+R: 0 0 0 0 0 0 0 0 0 0 
+R_sum: 0 0 0 0 0 0 0 0 0 0 
+Pivot: 35
+Index: 0
+Start: 0
+End: 9
+making partition L: 0
+Criando Job
+colocando L_Part[0]=11
+arg_bit[0], Pivot encontrado 35: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 0
+Swap_index: 0
+
+arg_bit[1], Pivot encontrado 35: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 4
+Swap_index: 1
+
+arg_bit[2], Pivot encontrado 35: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 4
+Swap_index: 2
+
+arg_bit[3], Pivot encontrado 35: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 4
+Swap_index: 3
+
+arg_bit[4], Pivot encontrado 35: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 4
+Swap_index: 4
+
+arg_bit[5], Pivot encontrado 35: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 4
+Swap_index: 5
+
+arg_bit[6], Pivot encontrado 35: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 4
+Swap_index: 6
+
+arg_bit[7], Pivot encontrado 35: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 4
+Swap_index: 7
+
+arg_bit[8], Pivot encontrado 35: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 4
+Swap_index: 8
+
+arg_bit[9], Pivot encontrado 0: 
+Particoes:
+V: 11 45 
+Bin L: 1 0 
+Bin R: 0 1 
+Sum L: 1 1 
+Sum R: 0 0 
+part L: 11 
+part R: 35 
+L_size: 1
+R_size: 1
+side: 4
+Swap_index: 9
+
+Done parts
+Rand select:
+A: 35 
+size: 1
+k position: 3
+11 45 55 29 57 42 25 4 19 35 
+35 
+0.000388
