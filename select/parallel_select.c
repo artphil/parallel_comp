@@ -4,10 +4,13 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <sys/time.h>
+
 #include "thread_pool.h"
 
-// ./parallel_select <N> <k> <type>
-
+/* 
+	./parallel_select <N> <k> <type>
+*/
 void array_print(int *V, int size)
 {
 	for (int i = 0; i < size; i++)
@@ -75,12 +78,12 @@ void set_bit(void *args)
 
 	if (data->V[data->index] < data->pivot)
 	{
-		printf("L bit set on %d\n", data->index - data->start);
+		// printf("L bit set on %d\n", data->index - data->start);
 		data->L[data->index - data->start] = 1;
 	}
 	else if (data->V[data->index] > data->pivot)
 	{
-		printf("R bit set on %d\n", data->index - data->start);
+		// printf("R bit set on %d\n", data->index - data->start);
 		data->R[data->index - data->start] = 1;
 	}
 }
@@ -168,12 +171,12 @@ void add_to_partition(void *arg)
 	particoes *data = (particoes *)arg;
 	if (data->side == 0)
 	{ // Partition index from PrefixSum, value fromadd_to_partition original vector
-		printf("colocando L_Part[%d]=%d\n", data->L_sum[data->swap_index] - 1, data->V[data->swap_index]);
+		// printf("colocando L_Part[%d]=%d\n", data->L_sum[data->swap_index] - 1, data->V[data->swap_index]);
 		data->L_part[data->L_sum[data->swap_index] - 1] = data->V[data->swap_index];
 	}
 	else
 	{
-		printf("colocando R_Part[%d]=%d\n", data->R_sum[data->swap_index], data->V[data->swap_index]);
+		// printf("colocando R_Part[%d]=%d\n", data->R_sum[data->swap_index], data->V[data->swap_index]);
 		data->R_part[data->R_sum[data->swap_index] - 1] = data->V[data->swap_index];
 	}
 }
@@ -199,7 +202,7 @@ particoes *partition(int *A, int size, int result_index, int pivot, tpool_t *thr
 	///pivot = A[j];
 	///printf("new pivo: %d\n", pivot);
 	///swap(A, j, size - 1);
-	array_print(A, size);
+	// array_print(A, size);
 	/*
 		2 - ADD jobs -> set valores no vetor binario
 	*/
@@ -223,22 +226,22 @@ particoes *partition(int *A, int size, int result_index, int pivot, tpool_t *thr
 		//t_data_print(&(arg_bit[j]));
 
 		// Adciona tarefa para a pool de threads
-		threads->init = true;
+		// threads->init = true;
 		job = tpool_add_work(threads, &set_bit, (void *)&(arg_bit[j]));
 		///printf("Job: %d\n", job);
 	}
 
 	// Espera todas as tarefas serem completadas
 	int done = 0;
-	for (;;)
-	{
+	// for (;;)
+	// {
 		done = tpool_wait(threads);
-		printf("done %d\n", done);
-		if (done == 42)
-			break;
-	}
+		// printf("done %d\n", done);
+		// if (done == 42)
+			// break;
+	// }
 
-	t_data_print(&(arg_bit[0]));
+	// t_data_print(&(arg_bit[0]));
 
 	/*
 		3 - somar L e R
@@ -266,35 +269,35 @@ particoes *partition(int *A, int size, int result_index, int pivot, tpool_t *thr
 
 		if (result[h].L[h] == 1)
 		{
-			printf("making partition L: %d\n", result[h].swap_index);
+			// printf("making partition L: %d\n", result[h].swap_index);
 			result[h].side = 0; // determina a particao (left = 0 or right = 1)
-			threads->init = true;
+			// threads->init = true;
 			tpool_add_work(threads, &add_to_partition, &result[h]);
 		}
 
 		else if (result[h].R[h] == 1)
 		{
-			printf("making partition R: %d\n", result[h].swap_index);
+			// printf("making partition R: %d\n", result[h].swap_index);
 			result[h].side = 1;
-			threads->init = true;
+			// threads->init = true;
 			tpool_add_work(threads, &add_to_partition, &result[h]);
 		}
 	}
 
 	int done2 = 0;
-	for (;;)
-	{
+	// for (;;)
+	// {
 		done2 = tpool_wait(threads);
-		printf("done2 %d\n", done2);
-		if (done2 == 42)
-		{
-			break;
-		}
-	}
+		// printf("done2 %d\n", done2);
+		// if (done2 == 42)
+		// {
+			// break;
+		// }
+	// }
 
-	printf("arg_bit[%d], Pivot encontrado %d: \n", 0, arg_bit[0].pivot);
-	struct_particoes_print(&(result[0]));
-	printf("\n");
+	// printf("arg_bit[%d], Pivot encontrado %d: \n", 0, arg_bit[0].pivot);
+	// struct_particoes_print(&(result[0]));
+	// printf("\n");
 
 	// TODO: REFATORAR E ADD FREEs
 	/*
@@ -323,11 +326,11 @@ int rand_select(int *A, int size, int number, tpool_t *t)
 	int pivot = A[x];
 	swap(A, x, size - 1);
 
-	printf("Before partition:\nA: ");
-	array_print(A, size);
+	// printf("Before partition:\nA: ");
+	// array_print(A, size);
 
 	parts = partition(A, size, number, pivot, t);
-	printf("Done parts\n");
+	// printf("Done parts\n");
 
 	// k = q - first + 1;
 	if (parts[0].L_size == number - 1)
@@ -335,27 +338,27 @@ int rand_select(int *A, int size, int number, tpool_t *t)
 
 	else if (parts[0].L_size >= number)
 	{
-		printf("\nLEFT\n");
+		// printf("\nLEFT\n");
 		A = parts[0].L_part;
 		size = parts[0].L_size;
 		free(parts);
-		printf("Rand select:\nA: ");
-		array_print(A, size);
-		printf("size: %d\n", size);
-		printf("k position: %d\n", number);
+		// printf("Rand select:\nA: ");
+		// array_print(A, size);
+		// printf("size: %d\n", size);
+		// printf("k position: %d\n", number);
 		return rand_select(A, size, number, t);
 	}
 	else
 	{
-		printf("\nRIGHT\n");
+		// printf("\nRIGHT\n");
 		A = parts[0].R_part;
 		size = parts[0].R_size;
 		int L_size = parts[0].L_size;
 		free(parts);
-		printf("Rand select:\nA: ");
-		array_print(A, size);
-		printf("size: %d\n", size);
-		printf("k position: %d\n", number - L_size);
+		// printf("Rand select:\nA: ");
+		// array_print(A, size);
+		// printf("size: %d\n", size);
+		// printf("k position: %d\n", number - L_size);
 		return rand_select(A, size, number - L_size - 1, t);
 	}
 }
@@ -375,7 +378,7 @@ int main(int argc, char **argv)
 	char *checked;
 	int number, aux;
 	char to_print, to_time;
-	clock_t start_time, end_time;
+	struct timeval start_time, end_time;
 	tpool_t *thpool; //Pool de threads
 	// Le argumentos
 	if (argc < 5)
@@ -409,8 +412,8 @@ int main(int argc, char **argv)
 	else if (OPTION == 'l')
 		to_print = 1;
 
-	// Inicia a contagem do tempo
-	start_time = clock();
+	// Inicia a contagem do tempo global
+	gettimeofday(&start_time, NULL);
 
 	// Aloca memoria
 	data = (int *)malloc(DATA_LENGTH * sizeof(int));
@@ -427,10 +430,10 @@ int main(int argc, char **argv)
 	}
 	shuffle(data, DATA_LENGTH);
 
-	printf("Original:\nA: ");
-	array_print(data, DATA_LENGTH);
-	printf("size: %d\n", DATA_LENGTH);
-	printf("k position: %d\n\n", TARGET);
+	// printf("Original:\nA: ");
+	// array_print(data, DATA_LENGTH);
+	// printf("size: %d\n", DATA_LENGTH);
+	// printf("k position: %d\n\n", TARGET);
 
 	// Seleciona iesimo numero
 	number = rand_select(data, DATA_LENGTH, TARGET, thpool);
@@ -439,7 +442,7 @@ int main(int argc, char **argv)
 	tpool_destroy(thpool);
 
 	// Encerra a contagem do tempo
-	end_time = clock();
+	gettimeofday(&end_time, NULL);
 
 	// Imprime os numeros do grupo
 	qsort(data, DATA_LENGTH, sizeof(int), comparer);
@@ -453,7 +456,7 @@ int main(int argc, char **argv)
 	}
 	// Imprime o tempo
 	if (to_time)
-		printf("%.6lf\n", (double)(end_time - start_time) / CLOCKS_PER_SEC);
+		printf("%.6f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e6);
 
 	return 0;
 }
