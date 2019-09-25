@@ -3,6 +3,7 @@
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "thread_pool.h"
 
 // ./parallel_select <N> <k> <type>
@@ -74,10 +75,12 @@ void set_bit(void *args)
 
 	if (data->V[data->index] < data->pivot)
 	{
+		printf("L bit set on %d\n", data->index - data->start);
 		data->L[data->index - data->start] = 1;
 	}
-	else
+	else if (data->V[data->index] > data->pivot)
 	{
+		printf("R bit set on %d\n", data->index - data->start);
 		data->R[data->index - data->start] = 1;
 	}
 }
@@ -119,15 +122,15 @@ typedef struct particoes
 void struct_particoes_print(particoes *p)
 {
 	printf("Particoes:\nV: ");
-	array_print(p->V, p->L_size + p->R_size);
+	array_print(p->V, p->L_size + p->R_size + 1);
 	printf("Bin L: ");
-	array_print(p->L, p->L_size + p->R_size);
+	array_print(p->L, p->L_size + p->R_size + 1);
 	printf("Bin R: ");
-	array_print(p->R, p->L_size + p->R_size);
+	array_print(p->R, p->L_size + p->R_size + 1);
 	printf("Sum L: ");
-	array_print(p->L_sum, p->L_size + p->R_size);
+	array_print(p->L_sum, p->L_size + p->R_size + 1);
 	printf("Sum R: ");
-	array_print(p->R_sum, p->L_size + p->R_size);
+	array_print(p->R_sum, p->L_size + p->R_size + 1);
 	printf("part L: ");
 	array_print(p->L_part, p->L_size);
 	printf("part R: ");
@@ -141,7 +144,7 @@ void struct_particoes_print(particoes *p)
 particoes aloca_particao(t_data data, int size, int *L_part, int *R_part)
 {
 	int size_L = data.L_sum[size - 1];
-	int size_R = data.R_sum[size - 1] + 1;
+	int size_R = data.R_sum[size - 1];
 
 	particoes aux;
 
@@ -165,27 +168,25 @@ void add_to_partition(void *arg)
 	particoes *data = (particoes *)arg;
 	if (data->side == 0)
 	{ // Partition index from PrefixSum, value fromadd_to_partition original vector
-		printf("colocando L_Part[%d]=%d\n", data->L_sum[data->swap_index]-1, data->V[data->swap_index]);
-		data->L_part[data->L_sum[data->swap_index]-1] = data->V[data->swap_index];
+		printf("colocando L_Part[%d]=%d\n", data->L_sum[data->swap_index] - 1, data->V[data->swap_index]);
+		data->L_part[data->L_sum[data->swap_index] - 1] = data->V[data->swap_index];
 	}
 	else
 	{
 		printf("colocando R_Part[%d]=%d\n", data->R_sum[data->swap_index], data->V[data->swap_index]);
-		data->R_part[data->R_sum[data->swap_index]] = data->V[data->swap_index];
+		data->R_part[data->R_sum[data->swap_index] - 1] = data->V[data->swap_index];
 	}
 }
 
 // Cria duas particoes com numeros maiores e menores que o pivor
-particoes *partition(int *A, int size, int result_index, tpool_t *threads)
+particoes *partition(int *A, int size, int result_index, int pivot, tpool_t *threads)
 {
-	int i, j, pivot;
-
+	int i, j;
 
 	int *bit_L_array = new_array(size);
 	int *bit_R_array = new_array(size);
-	int *sum_L_array = (int *)malloc(size * sizeof(int));
-	int *sum_R_array = (int *)malloc(size * sizeof(int));
-	
+	int *sum_L_array = new_array(size);
+	int *sum_R_array = new_array(size);
 
 	t_data *arg_bit = (t_data *)malloc(size * sizeof(t_data));
 
@@ -193,16 +194,17 @@ particoes *partition(int *A, int size, int result_index, tpool_t *threads)
 		1 - escolhe pivo
 	*/
 	///printf("size-1:%d\n", size - 1);
-	j = (rand() % size - 1);
-	pivot = A[j];
+	///j = (rand() % size - 1);
 	///printf("pivo: %d\n", pivot);
-	swap(A, j, size - 1);
-
+	///pivot = A[j];
+	///printf("new pivo: %d\n", pivot);
+	///swap(A, j, size - 1);
+	array_print(A, size);
 	/*
 		2 - ADD jobs -> set valores no vetor binario
 	*/
 	int job;
-	for (j = 0; j < size - 1; j++)
+	for (j = 0; j < size; j++)
 	{
 		arg_bit[j].V = A;
 
@@ -221,12 +223,21 @@ particoes *partition(int *A, int size, int result_index, tpool_t *threads)
 		//t_data_print(&(arg_bit[j]));
 
 		// Adciona tarefa para a pool de threads
+		threads->init = true;
 		job = tpool_add_work(threads, &set_bit, (void *)&(arg_bit[j]));
-		printf("Job: %d\n", job);
+		///printf("Job: %d\n", job);
 	}
 
 	// Espera todas as tarefas serem completadas
-	tpool_wait(threads); ///
+	int done = 0;
+	for (;;)
+	{
+		done = tpool_wait(threads);
+		printf("done %d\n", done);
+		if (done == 42)
+			break;
+	}
+
 	t_data_print(&(arg_bit[0]));
 
 	/*
@@ -236,13 +247,13 @@ particoes *partition(int *A, int size, int result_index, tpool_t *threads)
 
 	/*
 
-		4 - ADD jobs 
+		4 - ADD jobs
 			-> Preenche vetores auxiliares -> if vetor bin L = 0 -> preenche A[i] no R, else no L.
 
 	*/
 	particoes *result = (particoes *)malloc(size * sizeof(particoes));
-	int *L_part = (int *)calloc(arg_bit[0].L_sum[size-1], sizeof(int));
-	int *R_part = (int *)calloc(arg_bit[0].R_sum[size-1]+1, sizeof(int));
+	int *L_part = (int *)calloc(arg_bit[0].L_sum[size - 1], sizeof(int));
+	int *R_part = (int *)calloc(arg_bit[0].R_sum[size - 1], sizeof(int));
 
 	for (int h = 0; h < size; h++)
 	{
@@ -257,6 +268,7 @@ particoes *partition(int *A, int size, int result_index, tpool_t *threads)
 		{
 			printf("making partition L: %d\n", result[h].swap_index);
 			result[h].side = 0; // determina a particao (left = 0 or right = 1)
+			threads->init = true;
 			tpool_add_work(threads, &add_to_partition, &result[h]);
 		}
 
@@ -264,18 +276,25 @@ particoes *partition(int *A, int size, int result_index, tpool_t *threads)
 		{
 			printf("making partition R: %d\n", result[h].swap_index);
 			result[h].side = 1;
+			threads->init = true;
 			tpool_add_work(threads, &add_to_partition, &result[h]);
 		}
 	}
-	tpool_wait(threads);
-	// add o pivo
-	for(int h = 0; h < size; h++)
+
+	int done2 = 0;
+	for (;;)
 	{
-		printf("arg_bit[%d], Pivot encontrado %d: \n", h, arg_bit[h].pivot);
-		result[h].R_part[0] = arg_bit[0].pivot;
-		struct_particoes_print(&(result[h]));
-		printf("\n");
+		done2 = tpool_wait(threads);
+		printf("done2 %d\n", done2);
+		if (done2 == 42)
+		{
+			break;
+		}
 	}
+
+	printf("arg_bit[%d], Pivot encontrado %d: \n", 0, arg_bit[0].pivot);
+	struct_particoes_print(&(result[0]));
+	printf("\n");
 
 	// TODO: REFATORAR E ADD FREEs
 	/*
@@ -289,7 +308,6 @@ particoes *partition(int *A, int size, int result_index, tpool_t *threads)
 	free(sum_R_array);
 	*/
 
-
 	return result;
 }
 
@@ -301,21 +319,25 @@ int rand_select(int *A, int size, int number, tpool_t *t)
 
 	if (size == 1)
 		return A[0];
+	int x = rand() % size;
+	int pivot = A[x];
+	swap(A, x, size - 1);
 
 	printf("Before partition:\nA: ");
 	array_print(A, size);
 
-	parts = partition(A, size, number, t);
+	parts = partition(A, size, number, pivot, t);
 	printf("Done parts\n");
 
 	// k = q - first + 1;
-	if (parts->L_size == number-1)
-		return parts->R_part[0];
+	if (parts[0].L_size == number - 1)
+		return pivot;
 
-	else if (parts->L_size > number)
+	else if (parts[0].L_size >= number)
 	{
-		A = parts->L_part;
-		size = parts->L_size;
+		printf("\nLEFT\n");
+		A = parts[0].L_part;
+		size = parts[0].L_size;
 		free(parts);
 		printf("Rand select:\nA: ");
 		array_print(A, size);
@@ -325,9 +347,10 @@ int rand_select(int *A, int size, int number, tpool_t *t)
 	}
 	else
 	{
-		A = parts->R_part;
-		size = parts->R_size;
-		int L_size = parts->L_size;
+		printf("\nRIGHT\n");
+		A = parts[0].R_part;
+		size = parts[0].R_size;
+		int L_size = parts[0].L_size;
 		free(parts);
 		printf("Rand select:\nA: ");
 		array_print(A, size);
@@ -335,6 +358,11 @@ int rand_select(int *A, int size, int number, tpool_t *t)
 		printf("k position: %d\n", number - L_size);
 		return rand_select(A, size, number - L_size - 1, t);
 	}
+}
+
+int comparer(const void *a, const void *b)
+{
+	return (*(int *)a - *(int *)b);
 }
 
 int main(int argc, char **argv)
@@ -407,10 +435,14 @@ int main(int argc, char **argv)
 	// Seleciona iesimo numero
 	number = rand_select(data, DATA_LENGTH, TARGET, thpool);
 
+	// Destroi pool
+	tpool_destroy(thpool);
+
 	// Encerra a contagem do tempo
 	end_time = clock();
 
 	// Imprime os numeros do grupo
+	qsort(data, DATA_LENGTH, sizeof(int), comparer);
 	if (to_print)
 	{
 		for (aux = 0; aux < DATA_LENGTH; aux++)
