@@ -34,6 +34,13 @@ void print_array(int *V, int size)
 	printf("\n");
 }
 
+void print_subarray(int *V, int s, int e)
+{
+	for (int i = s; i <= e; i++)
+		printf("%d ", (V)[i]);
+	printf("\n");
+}
+
 void print_part(part_t *p)
 {
 	printf("######################################################\n");
@@ -42,7 +49,7 @@ void print_part(part_t *p)
 	printf("pivo	: %d\n", p->pivot);
 	printf("------------------------------------------------------\n");
 	printf("v		: ");
-	print_array(p->V, p->length);
+	print_subarray(p->V, p->start, p->end);
 	printf("tamanho	: %d\n", p->length);
 	printf("inicio	: %d\n", p->start);
 	printf("fim		: %d\n", p->end);
@@ -91,8 +98,6 @@ void partition(part_t *tparts)
 	// part_t *tparts = (part_t *)data;
 	int i, j;
 
-	print_part(tparts);
-
 	if (tparts->length == 0)
 	{
 		tparts->l_length = tparts->r_length = 0;
@@ -116,6 +121,8 @@ void partition(part_t *tparts)
 	tparts->r_start = i + 1;
 	tparts->r_end = tparts->end;
 	tparts->r_length = tparts->r_end - tparts->r_start + 1;
+
+	// print_part(tparts);
 }
 
 // Seleciona o iesimo numero do vetor
@@ -123,6 +130,7 @@ int rand_select(part_t *tparts)
 {
 	int number;
 	int index;
+	int p_aux[tparts[0].threads];
 	int pivot = 0;
 	int length = 0;
 	int l_length = 0;
@@ -133,15 +141,23 @@ int rand_select(part_t *tparts)
 		if (tparts[number].length > 0)
 		{
 			if (tparts[number].l_length > 0)
-				pivot = tparts[number].V[tparts[number].l_start];
+			{
+				index = rand() % tparts[number].l_length;
+				p_aux[number] = tparts[number].V[tparts[number].l_start + index];
+				// printf("i: %d p: %d\n",index,pivot);
+			}
 			else if (tparts[number].r_length > 0)
-				pivot = tparts[number].V[tparts[number].r_start];
+			{
+				index = rand() % tparts[number].r_length;
+				p_aux[number] = tparts[number].V[tparts[number].r_start + index];
+				// printf("i: %d p: %d\n",index,pivot);
+			}
 		}
 	}
-
+	pivot = p_aux[rand() % tparts[0].threads];
 	if (length == 1)
 		return pivot;
-	printf("SELECT: \n");
+	// printf("SELECT: \n");
 
 	for (number = 0; number < tparts[0].threads; number++)
 	{
@@ -154,9 +170,9 @@ int rand_select(part_t *tparts)
 		l_length += tparts[number].l_length;
 	}
 
-	if (l_length > tparts[0].index-1)
+	if (l_length > tparts[0].index - 1)
 	{
-		printf("\nL\n");
+		// printf("\nL\n");
 
 		for (number = 0; number < tparts[0].threads; number++)
 		{
@@ -168,9 +184,9 @@ int rand_select(part_t *tparts)
 	}
 	else
 	{
-		printf("R\n");
-		
-		index = tparts[0].index - l_length - 1;
+		// printf("\nR\n");
+
+		index = tparts[0].index - l_length;
 		for (number = 0; number < tparts[0].threads; number++)
 		{
 			tparts[number].index = index;
@@ -185,7 +201,7 @@ int rand_select(part_t *tparts)
 int main(int argc, char **argv)
 {
 	int DATA_LENGTH;
-	char *OPTION;
+	char OPTION;
 	int TARGET;
 	int N_THREADS;
 	int *data;
@@ -208,18 +224,18 @@ int main(int argc, char **argv)
 	{
 		DATA_LENGTH = atoi(argv[1]);
 		TARGET = atoi(argv[2]);
-		OPTION = argv[3];
+		OPTION = argv[3][0];
 		N_THREADS = atoi(argv[4]);
 	}
 
 	// Identifica de impressao
 	to_print = to_time = 0;
 
-	if (strcmp(OPTION, "all") == 0)
+	if (OPTION == 'a')
 		to_print = to_time = 1;
-	else if (strcmp(OPTION, "time") == 0)
+	else if (OPTION == 't')
 		to_time = 1;
-	else if (strcmp(OPTION, "l") == 0)
+	else if (OPTION == 'l')
 		to_print = 1;
 
 	// Inicia a contagem do tempo
@@ -238,17 +254,16 @@ int main(int argc, char **argv)
 	{
 		i_aux += 1 + (rand() % 10);
 		data[number] = i_aux;
-		printf("%d ",i_aux);
+		// printf("%d ", i_aux);
 	}
-	printf("\ndata: ");
-	print_array(data, DATA_LENGTH);
-	shuffle(data, DATA_LENGTH);
+	// printf("\ndata: ");
+	// print_array(data, DATA_LENGTH);
+	// shuffle(data, DATA_LENGTH);
 
 	// Inicialisa estrutura de dados
 	l_aux = DATA_LENGTH / N_THREADS;
-		
 
-	printf("MAIN:\n");
+	// printf("MAIN:\n");
 	for (number = 0; number < N_THREADS; number++)
 	{
 		tparts[number].t_num = number;
@@ -268,7 +283,7 @@ int main(int argc, char **argv)
 			tparts[number].end = tparts[number].l_end = DATA_LENGTH - 1;
 			tparts[number].length = tparts[number].l_length = DATA_LENGTH - i_aux;
 		}
-		print_part(&(tparts[number]));
+		// print_part(&(tparts[number]));
 	}
 
 	// Seleciona iesimo numero

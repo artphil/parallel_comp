@@ -379,7 +379,7 @@ int comparer(const void *a, const void *b)
 int main(int argc, char **argv)
 {
 	int DATA_LENGTH;
-	char *OPTION;
+	char OPTION;
 	int TARGET;
 	int N_THREADS;
 	int *data;
@@ -404,7 +404,7 @@ int main(int argc, char **argv)
 		TARGET = atoi(argv[2]);
 		///printf("2: %d\n", TARGET);
 
-		OPTION = argv[3];
+		OPTION = argv[3][0];
 		///printf("3: %c\n", OPTION);
 
 		N_THREADS = atoi(argv[4]);
@@ -415,11 +415,11 @@ int main(int argc, char **argv)
 	// Identifica de impressao
 	to_print = to_time = 0;
 
-	if (strcmp(OPTION, "all")==0)
+	if (OPTION=='a')
 		to_print = to_time = 1;
-	else if (strcmp(OPTION, "time")==0)
+	else if (OPTION=='t')
 		to_time = 1;
-	else if (strcmp(OPTION, "l")==0)
+	else if (OPTION=='l')
 		to_print = 1;
 
 	// Inicia a contagem do tempo global
