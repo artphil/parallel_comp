@@ -3,14 +3,22 @@
 #include <time.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <stdbool.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include "thread_pool.h"
 
 /* 
-	./parallel_select <N> <k> <type>
+	Entrada:
+
+	./parallel_select <N> <k> <t> <p>
+
+	N = Tamanho do vetor [1-10⁹]
+	k = Indice procurado [1-N]
+	t = Tipo de saida [all,time]
+	p  = Numero de threads
 */
+
 void array_print(int *V, int size)
 {
 	for (int i = 0; i < size; i++)
@@ -371,15 +379,17 @@ int comparer(const void *a, const void *b)
 int main(int argc, char **argv)
 {
 	int DATA_LENGTH;
-	char OPTION;
+	char *OPTION;
 	int TARGET;
 	int N_THREADS;
 	int *data;
-	char *checked;
 	int number, aux;
 	char to_print, to_time;
 	struct timeval start_time, end_time;
 	tpool_t *thpool; //Pool de threads
+
+	// srand(time(NULL));
+
 	// Le argumentos
 	if (argc < 5)
 	{
@@ -394,7 +404,7 @@ int main(int argc, char **argv)
 		TARGET = atoi(argv[2]);
 		///printf("2: %d\n", TARGET);
 
-		OPTION = argv[3][0];
+		OPTION = argv[3];
 		///printf("3: %c\n", OPTION);
 
 		N_THREADS = atoi(argv[4]);
@@ -405,11 +415,11 @@ int main(int argc, char **argv)
 	// Identifica de impressao
 	to_print = to_time = 0;
 
-	if (OPTION == 'a')
+	if (strcmp(OPTION, "all")==0)
 		to_print = to_time = 1;
-	else if (OPTION == 't')
+	else if (strcmp(OPTION, "time")==0)
 		to_time = 1;
-	else if (OPTION == 'l')
+	else if (strcmp(OPTION, "l")==0)
 		to_print = 1;
 
 	// Inicia a contagem do tempo global
@@ -445,7 +455,7 @@ int main(int argc, char **argv)
 	gettimeofday(&end_time, NULL);
 
 	// Imprime os numeros do grupo
-	qsort(data, DATA_LENGTH, sizeof(int), comparer);
+	// qsort(data, DATA_LENGTH, sizeof(int), comparer);
 	if (to_print)
 	{
 		for (aux = 0; aux < DATA_LENGTH; aux++)

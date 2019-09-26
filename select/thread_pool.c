@@ -20,8 +20,8 @@ struct tpool
 	pthread_cond_t working_cond;
 	size_t working_cnt;
 	size_t thread_cnt;
-	bool stop;
-	bool init;
+	int stop;
+	int init;
 };
 
 static tpool_work_t *tpool_work_create(thread_func_t func, void *arg)
@@ -85,7 +85,7 @@ static void *tpool_worker(void *arg)
 
 		work = tpool_work_get(tm);
 		tm->working_cnt++;
-		tm->init = false;
+		tm->init = 0;
 		// printf("Subiu job %lu\n", tm->working_cnt);
 		pthread_mutex_unlock(&(tm->work_mutex));
 
@@ -153,7 +153,7 @@ void tpool_destroy(tpool_t *tm)
 		tpool_work_destroy(work);
 		work = work2;
 	}
-	tm->stop = true;
+	tm->stop = 1;
 	// printf("\n destroy tm->stop: %d\n", tm->stop);
 	pthread_cond_broadcast(&(tm->work_cond));
 	pthread_mutex_unlock(&(tm->work_mutex));
@@ -168,27 +168,27 @@ void tpool_destroy(tpool_t *tm)
 	free(tm);
 }
 
-bool tpool_add_work(tpool_t *tm, thread_func_t func, void *arg)
+int tpool_add_work(tpool_t *tm, thread_func_t func, void *arg)
 {
 
 	tpool_work_t *work;
-	tm->init = true;
+	tm->init = 1;
 
 	// printf("Criando Job\n");
 
 	if (tm == NULL)
 	{
 		// printf("tm vazio\n");
-		tm->init = false;
-		return false;
+		tm->init = 0;
+		return 0;
 	}
 
 	work = tpool_work_create(func, arg);
 	if (work == NULL)
 	{
 		// printf("work vazio\n");
-		tm->init = false;
-		return false;
+		tm->init = 0;
+		return 0;
 	}
 
 	pthread_mutex_lock(&(tm->work_mutex));
@@ -206,7 +206,7 @@ bool tpool_add_work(tpool_t *tm, thread_func_t func, void *arg)
 	pthread_cond_broadcast(&(tm->work_cond));
 	pthread_mutex_unlock(&(tm->work_mutex));
 
-	return true;
+	return 1;
 }
 /*
 int tpool_wait(tpool_t *tm)
