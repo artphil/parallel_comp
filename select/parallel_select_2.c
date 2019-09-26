@@ -92,10 +92,10 @@ void pprint(int *V, char name, int start, int end)
 }
 
 // Cria duas particoes com numeros maiores e menores que o pivor
-// void partition(void *data)
-void partition(part_t *tparts)
+// void partition(part_t *tparts)
+void partition(void *data)
 {
-	// part_t *tparts = (part_t *)data;
+	part_t *tparts = (part_t *)data;
 	int i, j;
 
 	if (tparts->length == 0)
@@ -126,7 +126,7 @@ void partition(part_t *tparts)
 }
 
 // Seleciona o iesimo numero do vetor
-int rand_select(part_t *tparts)
+int rand_select(part_t *tparts, tpool_t *thpool)
 {
 	int number;
 	int index;
@@ -162,9 +162,12 @@ int rand_select(part_t *tparts)
 	for (number = 0; number < tparts[0].threads; number++)
 	{
 		tparts[number].pivot = pivot;
-		partition(&tparts[number]); // PARALELIZAR
+		// partition(&tparts[number]); // PARALELIZAR
+		tpool_add_work(thpool, &partition, &tparts[number]);
 	}
 
+	tpool_wait(thpool);
+	
 	for (number = 0; number < tparts[0].threads; number++)
 	{
 		l_length += tparts[number].l_length;
@@ -180,7 +183,7 @@ int rand_select(part_t *tparts)
 			tparts[number].start = tparts[number].l_start;
 			tparts[number].end = tparts[number].l_end;
 		}
-		return rand_select(tparts);
+		return rand_select(tparts,thpool);
 	}
 	else
 	{
@@ -194,7 +197,7 @@ int rand_select(part_t *tparts)
 			tparts[number].start = tparts[number].r_start;
 			tparts[number].end = tparts[number].r_end;
 		}
-		return rand_select(tparts);
+		return rand_select(tparts,thpool);
 	}
 }
 
@@ -286,8 +289,11 @@ int main(int argc, char **argv)
 		// print_part(&(tparts[number]));
 	}
 
+	// Inicializa pool de Threads
+	thpool = tpool_create(N_THREADS);
+
 	// Seleciona iesimo numero
-	number = rand_select(tparts);
+	number = rand_select(tparts,thpool);
 	// number = rand_select(data, 0, DATA_LENGTH - 1, TARGET);
 
 	// Destroi pool
