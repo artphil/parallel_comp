@@ -88,8 +88,9 @@ static void *task_maker(void *arg)
 		work = get_task(trd);
 		trd->working_cnt++;
 		trd->init = 0;
-		// printf("Subiu job %lu\n", trd->working_cnt);
+
 		pthread_mutex_unlock(&(trd->t_mutex));
+	//	printf("Subiu job %lu\n", trd->working_cnt);
 
 		if (work != NULL)
 		{
@@ -99,7 +100,8 @@ static void *task_maker(void *arg)
 
 		pthread_mutex_lock(&(trd->t_mutex));
 		trd->working_cnt--;
-		// printf("Desceu job %lu\n", trd->working_cnt);
+//		printf("Desceu job %lu\n", trd->working_cnt);
+
 		if (!trd->stop && trd->working_cnt == 0 && trd->first == NULL)
 			pthread_cond_signal(&(trd->t_do_cond));
 		pthread_mutex_unlock(&(trd->t_mutex));
@@ -161,13 +163,13 @@ int wait_task(pool_t *trd)
 	}
 
 	pthread_mutex_lock(&(trd->t_mutex));
-	// printf("stop: %d, working_cnt: %lu, thread_cnt: %lu\n", trd->stop, trd->working_cnt, trd->thread_cnt);
+	// printf("stop: %d, working_cnt: %lu, thread_cnt: %lu\n", trd->stop, trd->working_cnt, trd->thread_cnt);                								    // PRINT
 	while (1)
 	{
-		// printf("stop: %d, working_cnt: %lu, thread_cnt: %lu\n", trd->stop, trd->working_cnt, trd->thread_cnt);
+		// printf("stop: %d, working_cnt: %lu, thread_cnt: %lu\n", trd->stop, trd->working_cnt, trd->thread_cnt);                								    // PRINT
 		if (trd->init)
 		{
-		// printf("... waiting init ...\n");
+	 	// printf("... waiting init ...\n");                								    // PRINT
 		}
 		else
 		if (trd->stop)
@@ -180,9 +182,10 @@ int wait_task(pool_t *trd)
 			if (trd->working_cnt == 0)
 				break;
 		}
-		pthread_cond_wait(&(trd->t_do_cond), &(trd->t_mutex));
+		pthread_cond_wait(&(trd->t_do_cond), &(trd->t_mutex));         		    // PRINT
 	}
 	pthread_mutex_unlock(&(trd->t_mutex));
+	// printf("DONE WAIT\n");                								    // PRINT
 	return 42;
 }
 

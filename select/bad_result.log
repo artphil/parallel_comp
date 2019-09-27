@@ -1,0 +1,226 @@
+index: 2 pivot: 0
+index: 2 pivot: 0
+SELECT: 
+Subiu job 1
+######################################################
+thread: 0
+indice	: 2
+stop: 0, working_cnt: 1, thread_cnt: 2
+stop: 0, working_cnt: 1, thread_cnt: 2
+pivo	: 19
+------------------------------------------------------
+v		: 4 11 Subiu job 2
+######################################################
+thread: 1
+indice	: 2
+pivo	: 19
+------------------------------------------------------
+v		: 35 42 19 25 29 
+tamanho	: 5
+inicio	: 0
+fim		: 4
+------------------------------------------------------
+l tam	: 2
+l ini	: 0
+l fim	: 1
+------------------------------------------------------
+r tam	: 3
+r ini	: 2
+r fim	: 4
+######################################################
+45 55 57 
+tamanho	: 5
+inicio	: 5
+fim		: 9
+------------------------------------------------------
+Desceu job 1
+l tam	: 0
+l ini	: 5
+l fim	: 4
+------------------------------------------------------
+r tam	: 5
+r ini	: 5
+r fim	: 9
+######################################################
+Desceu job 0
+stop: 0, working_cnt: 0, thread_cnt: 2
+index: 1 pivot: 0
+SELECT: 
+stop: 0, working_cnt: 0, thread_cnt: 2
+stop: 0, working_cnt: 0, thread_cnt: 2
+... waiting init ...
+Subiu job 1
+######################################################
+thread: 0
+indice	: 2
+pivo	: 32767
+------------------------------------------------------
+v		: 4 11 
+tamanho	: 2
+inicio	: 0
+fim		: 1
+------------------------------------------------------
+l tam	: 2
+l ini	: 0
+l fim	: 1
+------------------------------------------------------
+r tam	: 0
+r ini	: 2
+r fim	: 1
+######################################################
+Desceu job 1
+Subiu job 2
+Desceu job 0
+stop: 0, working_cnt: 0, thread_cnt: 2
+index: 0 pivot: 0
+SELECT: 
+Subiu job 1
+######################################################
+thread: 0
+indice	: 2
+pivo	: 4
+------------------------------------------------------
+v		: 4 11 
+tamanho	: 2
+inicio	: 0
+fim		: 1
+------------------------------------------------------
+l tam	: 0
+l ini	: 0
+l fim	: -1
+------------------------------------------------------
+r tam	: 2
+r ini	: 0
+r fim	: 1
+######################################################
+stop: 0, working_cnt: 1, thread_cnt: 2
+stop: 0, working_cnt: 1, thread_cnt: 2
+... waiting init ...
+Subiu job 2
+Desceu job 1
+Desceu job 0
+stop: 0, working_cnt: 0, thread_cnt: 2
+index: 0 pivot: 0
+SELECT: 
+stop: 0, working_cnt: 1, thread_cnt: 2
+stop: 0, working_cnt: 1, thread_cnt: 2
+Subiu job 1
+######################################################
+thread: 0
+indice	: 2
+pivo	: 4
+------------------------------------------------------
+v		: 4 11 
+tamanho	: 2
+inicio	: 0
+fim		: 1
+------------------------------------------------------
+l tam	: 0
+l ini	: 0
+l fim	: -1
+------------------------------------------------------
+r tam	: 2
+r ini	: 0
+r fim	: 1
+######################################################
+Desceu job 1
+Subiu job 2
+Desceu job 0
+stop: 0, working_cnt: 0, thread_cnt: 2
+index: 0 pivot: 0
+SELECT: 
+stop: 0, working_cnt: 0, thread_cnt: 2
+stop: 0, working_cnt: 0, thread_cnt: 2
+... waiting init ...
+Subiu job 1
+######################################################
+thread: 0
+indice	: 2
+pivo	: 32767
+------------------------------------------------------
+v		: 4 11 Subiu job 2
+Desceu job 1
+
+tamanho	: 2
+inicio	: 0
+fim		: 1
+------------------------------------------------------
+l tam	: 2
+l ini	: 0
+l fim	: 1
+------------------------------------------------------
+r tam	: 0
+r ini	: 2
+r fim	: 1
+######################################################
+Desceu job 0
+stop: 0, working_cnt: 0, thread_cnt: 2
+index: 0 pivot: 0
+SELECT: 
+Subiu job 1
+######################################################
+thread: 0
+indice	: 2
+pivo	: 0
+------------------------------------------------------
+v		: 4 11 stop: 0, working_cnt: 1, thread_cnt: 2
+stop: 0, working_cnt: 1, thread_cnt: 2
+... waiting init ...
+
+tamanho	: 2
+inicio	: 0
+fim		: 1
+------------------------------------------------------
+l tam	: 0
+l ini	: 0
+l fim	: -1
+------------------------------------------------------
+r tam	: 2
+r ini	: 0
+r fim	: 1
+######################################################
+Desceu job 1
+Subiu job 2
+Desceu job 0
+stop: 0, working_cnt: 0, thread_cnt: 2
+index: 1 pivot: 0
+SELECT: 
+stop: 0, working_cnt: 0, thread_cnt: 2
+stop: 0, working_cnt: 0, thread_cnt: 2
+... waiting init ...
+Subiu job 1
+######################################################
+thread: 0
+indice	: 2
+pivo	: 11
+------------------------------------------------------
+v		: 4 11 
+tamanho	: 2
+inicio	: 0
+fim		: 1
+------------------------------------------------------
+l tam	: 1
+l ini	: 0
+l fim	: 0
+------------------------------------------------------
+r tam	: 1
+r ini	: 1
+r fim	: 1
+######################################################
+Desceu job 1
+Subiu job 2
+Desceu job 0
+stop: 0, working_cnt: 0, thread_cnt: 2
+index: 0 pivot: 0
+stop: 1, working_cnt: 0, thread_cnt: 2
+stop: 1, working_cnt: 0, thread_cnt: 2
+Subiu job 1
+Desceu job 1
+Subiu job 2
+stop: 1, working_cnt: 1, thread_cnt: 1
+Desceu job 0
+stop: 1, working_cnt: 0, thread_cnt: 0
+0 0 19 25 29 35 42 45 55 57 
+4 
+0.004589
+

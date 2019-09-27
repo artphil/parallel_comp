@@ -83,14 +83,46 @@ void shuffle(int *V, int n)
 		swap(V, i, rand() % n);
 }
 
-void pprint(int *V, char name, int start, int end)
-{
-	printf("%c = ", name);
-	for (int i = start; i < end; i++)
-		printf("%d ", (V)[i]);
-	printf("\n");
+// counts number of inactive threads
+int inactive_threads(part_t *tparts){
+	int i = 0;
+	for(int j = 0; j <tparts[0].threads; j++)
+	{
+			if(tparts[j].length == 0)
+			{
+				i++;
+			}
+	}
+	return i;
 }
 
+// Active threads
+int *active_threads(part_t *tparts){
+	int *i = (int*)malloc(1 * sizeof(int));
+	int i_size = 0;
+	for(int j = 0; j <tparts[0].threads; j++)
+	{
+			if(tparts[j].length > 0)
+			{
+				i_size++;
+				i = realloc(i, i_size * sizeof(int));
+				i[i_size-1] = j;
+			}
+	}
+	return i;
+}
+
+int find_answer_index(part_t *tparts){
+	for(int j = 0; j <tparts[0].threads; j++)
+	{
+			if(tparts[j].length == 1)
+			{
+				return j;
+			}
+	}
+	// ERRO -  nao achou indice de resposta
+	return -1;
+}
 // Cria duas particoes com numeros maiores e menores que o pivor
 // void partition(part_t *tparts)
 void partition(void *data)
@@ -122,7 +154,8 @@ void partition(void *data)
 	tparts->r_end = tparts->end;
 	tparts->r_length = tparts->r_end - tparts->r_start + 1;
 
-	// print_part(tparts);
+	// printf("-------partition------\n");                       // PRINT
+ 	// print_part(tparts);                                       // PRINT
 }
 
 // Seleciona o iesimo numero do vetor
@@ -134,30 +167,64 @@ int rand_select(part_t *tparts, pool_t *thpool)
 	int pivot = 0;
 	int length = 0;
 	int l_length = 0;
+	int afk_threads;
+	int *active_threads_indexes;
 
-	for (number = 0; number < tparts[0].threads; number++)
+	afk_threads = inactive_threads(tparts);
+	active_threads_indexes = active_threads(tparts);
+
+	for (number = 0; number < (tparts[0].threads - afk_threads); number++)
 	{
-		length += tparts[number].length;
-		if (tparts[number].length > 0)
+		// printf("_________________________\n");
+		// print_part(&tparts[active_threads_indexes[number]]);
+
+		// printf("length 1 = %d\n", length);
+		length += tparts[active_threads_indexes[number]].length;
+		// printf("length 2 = %d\n", length);
+
+		if (tparts[active_threads_indexes[number]].length > 0)
 		{
-			if (tparts[number].l_length > 0)
+			if (tparts[active_threads_indexes[number]].l_length > 0)
 			{
-				index = rand() % tparts[number].l_length;
-				p_aux[number] = tparts[number].V[tparts[number].l_start + index];
-				// printf("i: %d p: %d\n",index,pivot);
+				index = rand() % tparts[active_threads_indexes[number]].l_length;
+				// printf("tparts[number].l_start + index = %d\n", tparts[active_threads_indexes[number]].l_start + index);
+				// printf("tparts[number].V[tparts[number].l_start + index] = %d\n", tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].l_start + index]);
+				p_aux[number] = tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].l_start + index];
+		//	 	printf("index: %d pivot: %d\n",index,pivot);
 			}
-			else if (tparts[number].r_length > 0)
+			else if (tparts[active_threads_indexes[number]].r_length > 0)
 			{
-				index = rand() % tparts[number].r_length;
-				p_aux[number] = tparts[number].V[tparts[number].r_start + index];
-				// printf("i: %d p: %d\n",index,pivot);
+
+				index = rand() % tparts[active_threads_indexes[number]].r_length;
+				// printf("tparts[number].r_start + index = %d\n", tparts[active_threads_indexes[number]].r_start + index);
+				// printf("tparts[number].V[tparts[number].r_start + index] = %d\n", tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].r_start + index]);
+
+				p_aux[number] = tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].r_start + index];
+		//		printf("index: %d pivot: %d\n",index,pivot);
 			}
 		}
 	}
-	pivot = p_aux[rand() % tparts[0].threads];
-	if (length == 1)
-		return pivot;
-	// printf("SELECT: \n");
+
+
+	// Stoṕ condition
+	if (length == 1){
+		int result_index;
+		result_index = find_answer_index(tparts);
+		if(result_index == -1) // ERRO, achou indice errado
+			exit(0);
+		else
+			return tparts[result_index].V[tparts[result_index].start];
+	}
+
+	// printf("p_aux: ");                                       			// PRINT
+	// print_array(p_aux, tparts[0].threads - afk_threads);           // PRINT
+	
+	pivot = p_aux[rand() % (tparts[0].threads - afk_threads)];
+
+	// printf("(tparts[0].threads - afk_threads): %d | pivo: %d | \n", (tparts[0].threads - afk_threads), pivot);          // PRINT
+
+
+	// printf("SELECT: \n");         															 // PRINT
 
 	for (number = 0; number < tparts[0].threads; number++)
 	{
@@ -167,7 +234,7 @@ int rand_select(part_t *tparts, pool_t *thpool)
 	}
 
 	wait_task(thpool);
-	
+
 	for (number = 0; number < tparts[0].threads; number++)
 	{
 		l_length += tparts[number].l_length;
@@ -175,7 +242,7 @@ int rand_select(part_t *tparts, pool_t *thpool)
 
 	if (l_length > tparts[0].index - 1)
 	{
-		// printf("\nL\n");
+	//   printf("\nL\n");       																   // PRINT
 
 		for (number = 0; number < tparts[0].threads; number++)
 		{
@@ -183,20 +250,26 @@ int rand_select(part_t *tparts, pool_t *thpool)
 			tparts[number].start = tparts[number].l_start;
 			tparts[number].end = tparts[number].l_end;
 		}
+	  //print_array(tparts[0].V, tparts[0].length);                								    // PRINT
 		return rand_select(tparts,thpool);
 	}
 	else
 	{
-		// printf("\nR\n");
+	//   printf("\nR\n");                								    // PRINT
 
 		index = tparts[0].index - l_length;
 		for (number = 0; number < tparts[0].threads; number++)
 		{
+
+			// print_part(&tparts[number]);                								    // PRINT
 			tparts[number].index = index;
 			tparts[number].length = tparts[number].r_length;
 			tparts[number].start = tparts[number].r_start;
 			tparts[number].end = tparts[number].r_end;
+			// printf("\nMUDOU\n");                								    // PRINT
+			// print_part(&tparts[number]);                								    // PRINT
 		}
+
 		return rand_select(tparts,thpool);
 	}
 }
@@ -259,6 +332,7 @@ int main(int argc, char **argv)
 		data[number] = i_aux;
 		// printf("%d ", i_aux);
 	}
+
 	// printf("\ndata: ");
 	// print_array(data, DATA_LENGTH);
 	// shuffle(data, DATA_LENGTH);
