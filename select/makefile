@@ -3,8 +3,8 @@ CFLAGS = -Wall
 TFLAGS = -lpthread 
 Vflags = valgrind --leak-check=full
 
-SRCS = sequential_select.c parallel_select.c 
-BINS = sequential_select parallel_select
+SRCS = sequential_select.c parallel_select.c parallel_select_2.c
+BINS = sequential_select parallel_select parallel_select_2
 
 # If the first argument is "run"...
 ifeq (run,$(firstword $(MAKECMDGOALS)))
@@ -16,6 +16,9 @@ endif
 
 
 all : ${BINS}
+	rm parallel_select.o
+	rm parallel_select_2.o 
+	rm thread_pool.o
 
 sequential_select : sequential_select.c
 	@echo "Checking.."
@@ -24,11 +27,18 @@ sequential_select : sequential_select.c
 parallel_select : parallel_select.o thread_pool.o
 	@echo "Checking.."
 	$(CC) -g parallel_select.o thread_pool.o  $(CFLAGS) $(TFLAGS) -o parallel_select 
-	rm parallel_select.o thread_pool.o
 	
 parallel_select.o : parallel_select.c
 	@echo "Checking object.."
 	$(CC) -c parallel_select.c
+
+parallel_select_2 : parallel_select_2.o thread_pool.o
+	@echo "Checking.."
+	$(CC) -g parallel_select_2.o thread_pool.o  $(CFLAGS) $(TFLAGS) -o parallel_select_2 
+	
+parallel_select_2.o : parallel_select_2.c
+	@echo "Checking object.."
+	$(CC) -c parallel_select_2.c
 
 thread_pool.o : thread_pool.c
 	@echo "Checking object.."
