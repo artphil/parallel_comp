@@ -46,4 +46,22 @@ tests :
 clean :
 	rm -rvf *.o ${BINS}
 
-.PHONY: all run clean val tests fresh
+
+testes : sequential_select parallel_select 
+	@for number in 1000000 10000000 100000000 1000000000  ; do \
+		echo "sequential_select $$number" ; \
+		./sequential_select $$number 555 t ; \
+		./sequential_select $$number 555 t ; \
+		./sequential_select $$number 555 t ; \
+	done
+
+	@for number in 1000000 10000000 100000000 1000000000 ; do \
+		for threads in 2 4 8 ; do \
+	    	echo "parallel_select $$number $$threads" ; \
+	    	./parallel_select $$number 555 t $$threads; \
+	    	./parallel_select $$number 555 t $$threads; \
+	    	./parallel_select $$number 555 t $$threads; \
+		done; \
+	done
+
+.PHONY: all run clean val tests testes fresh

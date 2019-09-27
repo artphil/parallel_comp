@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 	char to_print, to_time;
 	clock_t start_time, end_time;
 
-	srand(time(NULL));
+	// srand(time(NULL));
 
 	// Le argumentos
 	if (argc < 4)

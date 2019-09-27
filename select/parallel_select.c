@@ -83,6 +83,14 @@ void shuffle(int *V, int n)
 		swap(V, i, rand() % n);
 }
 
+void pprint(int *V, char name, int start, int end)
+{
+	printf("%c = ", name);
+	for (int i = start; i < end; i++)
+		printf("%d ", (V)[i]);
+	printf("\n");
+}
+
 // counts number of inactive threads
 int inactive_threads(part_t *tparts){
 	int i = 0;
@@ -154,8 +162,8 @@ void partition(void *data)
 	tparts->r_end = tparts->end;
 	tparts->r_length = tparts->r_end - tparts->r_start + 1;
 
-	// printf("-------partition------\n");                       // PRINT
- 	// print_part(tparts);                                       // PRINT
+//	printf("-------partition------\n");
+ //	print_part(tparts);
 }
 
 // Seleciona o iesimo numero do vetor
@@ -175,20 +183,20 @@ int rand_select(part_t *tparts, pool_t *thpool)
 
 	for (number = 0; number < (tparts[0].threads - afk_threads); number++)
 	{
-		// printf("_________________________\n");
-		// print_part(&tparts[active_threads_indexes[number]]);
+		//printf("_________________________\n");
+		//print_part(&tparts[active_threads_indexes[number]]);
 
-		// printf("length 1 = %d\n", length);
+	//	printf("length 1 = %d\n", length);
 		length += tparts[active_threads_indexes[number]].length;
-		// printf("length 2 = %d\n", length);
+//		printf("length 2 = %d\n", length);
 
 		if (tparts[active_threads_indexes[number]].length > 0)
 		{
 			if (tparts[active_threads_indexes[number]].l_length > 0)
 			{
 				index = rand() % tparts[active_threads_indexes[number]].l_length;
-				// printf("tparts[number].l_start + index = %d\n", tparts[active_threads_indexes[number]].l_start + index);
-				// printf("tparts[number].V[tparts[number].l_start + index] = %d\n", tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].l_start + index]);
+			//	printf("tparts[number].l_start + index = %d\n", tparts[active_threads_indexes[number]].l_start + index);
+		//		printf("tparts[number].V[tparts[number].l_start + index] = %d\n", tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].l_start + index]);
 				p_aux[number] = tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].l_start + index];
 		//	 	printf("index: %d pivot: %d\n",index,pivot);
 			}
@@ -196,8 +204,8 @@ int rand_select(part_t *tparts, pool_t *thpool)
 			{
 
 				index = rand() % tparts[active_threads_indexes[number]].r_length;
-				// printf("tparts[number].r_start + index = %d\n", tparts[active_threads_indexes[number]].r_start + index);
-				// printf("tparts[number].V[tparts[number].r_start + index] = %d\n", tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].r_start + index]);
+	//			printf("tparts[number].r_start + index = %d\n", tparts[active_threads_indexes[number]].r_start + index);
+//				printf("tparts[number].V[tparts[number].r_start + index] = %d\n", tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].r_start + index]);
 
 				p_aux[number] = tparts[active_threads_indexes[number]].V[tparts[active_threads_indexes[number]].r_start + index];
 		//		printf("index: %d pivot: %d\n",index,pivot);
@@ -216,15 +224,18 @@ int rand_select(part_t *tparts, pool_t *thpool)
 			return tparts[result_index].V[tparts[result_index].start];
 	}
 
-	// printf("p_aux: ");                                       			// PRINT
-	// print_array(p_aux, tparts[0].threads - afk_threads);           // PRINT
-	
+//	printf("p_aux: ");
+/*	for(int i = 0; i < (tparts[0].threads - afk_threads); i++)
+	{
+		printf("%d ",p_aux[i]);
+	}*/
+//	printf("\n");
 	pivot = p_aux[rand() % (tparts[0].threads - afk_threads)];
 
-	// printf("(tparts[0].threads - afk_threads): %d | pivo: %d | \n", (tparts[0].threads - afk_threads), pivot);          // PRINT
+	//printf("(tparts[0].threads - afk_threads): %d | pivo: %d | \n", (tparts[0].threads - afk_threads), pivot);
 
 
-	// printf("SELECT: \n");         															 // PRINT
+//	printf("SELECT: \n");
 
 	for (number = 0; number < tparts[0].threads; number++)
 	{
@@ -242,7 +253,7 @@ int rand_select(part_t *tparts, pool_t *thpool)
 
 	if (l_length > tparts[0].index - 1)
 	{
-	//   printf("\nL\n");       																   // PRINT
+	  //printf("\nL\n");
 
 		for (number = 0; number < tparts[0].threads; number++)
 		{
@@ -250,24 +261,24 @@ int rand_select(part_t *tparts, pool_t *thpool)
 			tparts[number].start = tparts[number].l_start;
 			tparts[number].end = tparts[number].l_end;
 		}
-	  //print_array(tparts[0].V, tparts[0].length);                								    // PRINT
+	  //print_array(tparts[0].V, tparts[0].length);
 		return rand_select(tparts,thpool);
 	}
 	else
 	{
-	//   printf("\nR\n");                								    // PRINT
+	//  printf("\nR\n");
 
 		index = tparts[0].index - l_length;
 		for (number = 0; number < tparts[0].threads; number++)
 		{
 
-			// print_part(&tparts[number]);                								    // PRINT
+			//print_part(&tparts[number]);
 			tparts[number].index = index;
 			tparts[number].length = tparts[number].r_length;
 			tparts[number].start = tparts[number].r_start;
 			tparts[number].end = tparts[number].r_end;
-			// printf("\nMUDOU\n");                								    // PRINT
-			// print_part(&tparts[number]);                								    // PRINT
+			//printf("\nMUDOU\n");
+		//	print_part(&tparts[number]);
 		}
 
 		return rand_select(tparts,thpool);
@@ -373,9 +384,6 @@ int main(int argc, char **argv)
 	// Destroi pool
 	destroy_pool(thpool);
 
-	// Desaloca memoria
-	free(tparts);
-	free(data);
 
 	// Encerra a contagem do tempo
 	gettimeofday(&end_time, NULL);
@@ -393,5 +401,8 @@ int main(int argc, char **argv)
 	if (to_time)
 		printf("%.6f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e6);
 
+		// Desaloca memoria
+		free(tparts);
+		free(data);
 	return 0;
 }
