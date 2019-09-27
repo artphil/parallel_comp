@@ -1,19 +1,25 @@
 #ifndef __POOL__
 #define __POOL__
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <pthread.h>
 
+// TAD do pool
+struct pool;
+typedef struct pool pool_t;
 
-struct tpool;
-typedef struct tpool tpool_t;
-typedef void (*thread_func_t)(void *arg);
+typedef void (*func_t)(void *arg);
 
-tpool_t *tpool_create(size_t num);
-void tpool_destroy(tpool_t *tm);
+// Construtor do pool
+pool_t *create_pool(size_t size);
 
-int tpool_add_work(tpool_t *tm, thread_func_t func, void *arg);
-int tpool_wait(tpool_t *tm);
+// Espera fim das tarefas
+int wait_task(pool_t *trd);
+
+// Adiciona tarefas a pool
+int add_task(pool_t *trd, func_t func, void *arg);
+
+// Destroi o pool
+void destroy_pool(pool_t *trd);
 
 #endif

@@ -1,32 +1,34 @@
-#include "thread_pool.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 
-struct tpool_work
-{
-	thread_func_t func;
-	void *arg;
-	struct tpool_work *next;
-};
-typedef struct tpool_work tpool_work_t;
+#include "thread_pool.h"
 
-struct tpool
+// Estrutura para receber as tarefas
+struct task
 {
-	tpool_work_t *work_first;
-	tpool_work_t *work_last;
-	pthread_mutex_t work_mutex;
-	pthread_cond_t work_cond;
-	pthread_cond_t working_cond;
+	func_t func;
+	void *arg;
+	struct task *next;
+};
+typedef struct task task_t;
+
+struct pool
+{
+	task_t *first;
+	task_t *last;
+	pthread_cond_t t_cond;
+	pthread_cond_t t_do_cond;
+	pthread_mutex_t t_mutex;
 	size_t working_cnt;
 	size_t thread_cnt;
-	int stop;
 	int init;
+	int stop;
 };
 
-static tpool_work_t *tpool_work_create(thread_func_t func, void *arg)
+static task_t *create_task(func_t func, void *arg)
 {
-	tpool_work_t *work;
+	task_t *work;
 
 	if (func == NULL)
 		return NULL;
@@ -38,227 +40,206 @@ static tpool_work_t *tpool_work_create(thread_func_t func, void *arg)
 	return work;
 }
 
-static void tpool_work_destroy(tpool_work_t *work)
+static void destroy_task(task_t *work)
 {
 	if (work == NULL)
 		return;
 	free(work);
 }
 
-static tpool_work_t *tpool_work_get(tpool_t *tm)
+static task_t *get_task(pool_t *trd)
 {
-	tpool_work_t *work;
+	task_t *work;
 
-	if (tm == NULL)
+	if (trd == NULL)
 		return NULL;
 
-	work = tm->work_first;
+	work = trd->first;
 	if (work == NULL)
 		return NULL;
 
 	if (work->next == NULL)
 	{
-		tm->work_first = NULL;
-		tm->work_last = NULL;
+		trd->first = NULL;
+		trd->last = NULL;
 	}
 	else
 	{
-		tm->work_first = work->next;
+		trd->first = work->next;
 	}
 
 	return work;
 }
 
-static void *tpool_worker(void *arg)
+static void *task_maker(void *arg)
 {
-	tpool_t *tm = arg;
-	tpool_work_t *work;
+	pool_t *trd = arg;
+	task_t *work;
 
 	while (1)
 	{
-		pthread_mutex_lock(&(tm->work_mutex));
-		if (tm->stop)
+		pthread_mutex_lock(&(trd->t_mutex));
+		if (trd->stop)
 			break;
 
-		if (tm->work_first == NULL)
-			pthread_cond_wait(&(tm->work_cond), &(tm->work_mutex));
+		if (trd->first == NULL)
+			pthread_cond_wait(&(trd->t_cond), &(trd->t_mutex));
 
-		work = tpool_work_get(tm);
-		tm->working_cnt++;
-		tm->init = 0;
-		// printf("Subiu job %lu\n", tm->working_cnt);
-		pthread_mutex_unlock(&(tm->work_mutex));
+		work = get_task(trd);
+		trd->working_cnt++;
+		trd->init = 0;
+		// printf("Subiu job %lu\n", trd->working_cnt);
+		pthread_mutex_unlock(&(trd->t_mutex));
 
 		if (work != NULL)
 		{
 			work->func(work->arg);
-			tpool_work_destroy(work);
+			destroy_task(work);
 		}
 
-		pthread_mutex_lock(&(tm->work_mutex));
-		tm->working_cnt--;
-		// printf("Desceu job %lu\n", tm->working_cnt);
-		if (!tm->stop && tm->working_cnt == 0 && tm->work_first == NULL)
-			pthread_cond_signal(&(tm->working_cond));
-		pthread_mutex_unlock(&(tm->work_mutex));
+		pthread_mutex_lock(&(trd->t_mutex));
+		trd->working_cnt--;
+		// printf("Desceu job %lu\n", trd->working_cnt);
+		if (!trd->stop && trd->working_cnt == 0 && trd->first == NULL)
+			pthread_cond_signal(&(trd->t_do_cond));
+		pthread_mutex_unlock(&(trd->t_mutex));
 	}
 
-	tm->thread_cnt--;
-	pthread_cond_signal(&(tm->working_cond));
-	pthread_mutex_unlock(&(tm->work_mutex));
+	trd->thread_cnt--;
+	pthread_cond_signal(&(trd->t_do_cond));
+	pthread_mutex_unlock(&(trd->t_mutex));
 	return NULL;
 }
 
-tpool_t *tpool_create(size_t num)
+int add_task(pool_t *trd, func_t func, void *arg)
 {
-	tpool_t *tm;
+
+	task_t *work;
+	trd->init = 1;
+
+	// printf("Criando Job\n");
+
+	if (trd == NULL)
+	{
+		// printf("trd vazio\n");
+		trd->init = 0;
+		return 0;
+	}
+
+	work = create_task(func, arg);
+	if (work == NULL)
+	{
+		// printf("work vazio\n");
+		trd->init = 0;
+		return 0;
+	}
+
+	pthread_mutex_lock(&(trd->t_mutex));
+	if (trd->first == NULL)
+	{
+		trd->first = work;
+		trd->last = trd->first;
+	}
+	else
+	{
+		trd->last->next = work;
+		trd->last = work;
+	}
+
+	pthread_cond_broadcast(&(trd->t_cond));
+	pthread_mutex_unlock(&(trd->t_mutex));
+
+	return 1;
+}
+
+int wait_task(pool_t *trd)
+{
+	if (trd == NULL)
+	{
+		return 0;
+		// printf("trd vazio - wait fail\n");
+	}
+
+	pthread_mutex_lock(&(trd->t_mutex));
+	// printf("stop: %d, working_cnt: %lu, thread_cnt: %lu\n", trd->stop, trd->working_cnt, trd->thread_cnt);
+	while (1)
+	{
+		// printf("stop: %d, working_cnt: %lu, thread_cnt: %lu\n", trd->stop, trd->working_cnt, trd->thread_cnt);
+		if (trd->init)
+		{
+		// printf("... waiting init ...\n");
+		}
+		else
+		if (trd->stop)
+		{
+			if (trd->thread_cnt == 0)
+				break;
+		}
+		else
+		{
+			if (trd->working_cnt == 0)
+				break;
+		}
+		pthread_cond_wait(&(trd->t_do_cond), &(trd->t_mutex));
+	}
+	pthread_mutex_unlock(&(trd->t_mutex));
+	return 42;
+}
+
+pool_t *create_pool(size_t num)
+{
+	pool_t *trd;
 	pthread_t thread;
 	size_t i;
 
 	if (num == 0)
 		num = 2;
 
-	tm = calloc(1, sizeof(*tm));
-	tm->thread_cnt = num;
+	trd = calloc(1, sizeof(*trd));
+	trd->thread_cnt = num;
 
-	pthread_mutex_init(&(tm->work_mutex), NULL);
-	pthread_cond_init(&(tm->work_cond), NULL);
-	pthread_cond_init(&(tm->working_cond), NULL);
+	pthread_mutex_init(&(trd->t_mutex), NULL);
+	pthread_cond_init(&(trd->t_cond), NULL);
+	pthread_cond_init(&(trd->t_do_cond), NULL);
 
-	tm->work_first = NULL;
-	tm->work_last = NULL;
+	trd->first = NULL;
+	trd->last = NULL;
 
 	for (i = 0; i < num; i++)
 	{
-		pthread_create(&thread, NULL, tpool_worker, tm);
+		pthread_create(&thread, NULL, task_maker, trd);
 		pthread_detach(thread);
 	}
 
-	return tm;
+	return trd;
 }
 
-void tpool_destroy(tpool_t *tm)
+void destroy_pool(pool_t *trd)
 {
-	tpool_work_t *work;
-	tpool_work_t *work2;
+	task_t *work;
+	task_t *work2;
 
-	if (tm == NULL)
+	if (trd == NULL)
 		return;
 
-	pthread_mutex_lock(&(tm->work_mutex));
-	work = tm->work_first;
+	pthread_mutex_lock(&(trd->t_mutex));
+	work = trd->first;
 	while (work != NULL)
 	{
 		work2 = work->next;
-		tpool_work_destroy(work);
+		destroy_task(work);
 		work = work2;
 	}
-	tm->stop = 1;
-	// printf("\n destroy tm->stop: %d\n", tm->stop);
-	pthread_cond_broadcast(&(tm->work_cond));
-	pthread_mutex_unlock(&(tm->work_mutex));
+	trd->stop = 1;
+	// printf("\n destroy trd->stop: %d\n", trd->stop);
+	pthread_cond_broadcast(&(trd->t_cond));
+	pthread_mutex_unlock(&(trd->t_mutex));
 
-	int done;
-	done = tpool_wait(tm);
+	wait_task(trd);
 
-	pthread_mutex_destroy(&(tm->work_mutex));
-	pthread_cond_destroy(&(tm->work_cond));
-	pthread_cond_destroy(&(tm->working_cond));
+	pthread_mutex_destroy(&(trd->t_mutex));
+	pthread_cond_destroy(&(trd->t_cond));
+	pthread_cond_destroy(&(trd->t_do_cond));
 
-	free(tm);
-}
-
-int tpool_add_work(tpool_t *tm, thread_func_t func, void *arg)
-{
-
-	tpool_work_t *work;
-	tm->init = 1;
-
-	// printf("Criando Job\n");
-
-	if (tm == NULL)
-	{
-		// printf("tm vazio\n");
-		tm->init = 0;
-		return 0;
-	}
-
-	work = tpool_work_create(func, arg);
-	if (work == NULL)
-	{
-		// printf("work vazio\n");
-		tm->init = 0;
-		return 0;
-	}
-
-	pthread_mutex_lock(&(tm->work_mutex));
-	if (tm->work_first == NULL)
-	{
-		tm->work_first = work;
-		tm->work_last = tm->work_first;
-	}
-	else
-	{
-		tm->work_last->next = work;
-		tm->work_last = work;
-	}
-
-	pthread_cond_broadcast(&(tm->work_cond));
-	pthread_mutex_unlock(&(tm->work_mutex));
-
-	return 1;
-}
-/*
-int tpool_wait(tpool_t *tm)
-{
-    if (tm == NULL){
-        return 0;
-        // printf("tm vazio - wait fail\n");
-    }
-
-    pthread_mutex_lock(&(tm->work_mutex));
-    while (1) {
-        if ((!tm->stop && tm->working_cnt != 0) || (tm->stop && tm->thread_cnt != 0)) {
-            pthread_cond_wait(&(tm->working_cond), &(tm->work_mutex));
-        } else {
-            break;
-        }
-    }
-    pthread_mutex_unlock(&(tm->work_mutex));
-    return 42;
-}
-*/
-int tpool_wait(tpool_t *tm)
-{
-	if (tm == NULL)
-	{
-		return 0;
-		// printf("tm vazio - wait fail\n");
-	}
-
-	pthread_mutex_lock(&(tm->work_mutex));
-	// printf("stop: %d, working_cnt: %lu, thread_cnt: %lu\n", tm->stop, tm->working_cnt, tm->thread_cnt);
-	// while ((!tm->stop && tm->working_cnt != 0)) {
-	while (1)
-	{
-		// printf("stop: %d, working_cnt: %lu, thread_cnt: %lu\n", tm->stop, tm->working_cnt, tm->thread_cnt);
-		if (tm->init)
-		{
-		// printf("... waiting init ...\n");
-		}
-		else
-		if (tm->stop)
-		{
-			if (tm->thread_cnt == 0)
-				break;
-		}
-		else
-		{
-			if (tm->working_cnt == 0)
-				break;
-		}
-		pthread_cond_wait(&(tm->working_cond), &(tm->work_mutex));
-	}
-	pthread_mutex_unlock(&(tm->work_mutex));
-	return 42;
+	free(trd);
 }

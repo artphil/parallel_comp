@@ -1,7 +1,0 @@
-Checking object..
-gcc -c parallel_select.c
-Checking object..
-gcc -c thread_pool.c
-Checking..
-gcc -g parallel_select.o thread_pool.o  -Wall  -lpthread  -o parallel_select 
-rm parallel_select.o thread_pool.o
