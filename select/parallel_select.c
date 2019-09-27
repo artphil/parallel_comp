@@ -401,8 +401,8 @@ int main(int argc, char **argv)
 	if (to_time)
 		printf("%.6f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e6);
 
-		// Desaloca memoria
-		free(tparts);
-		free(data);
+	// Desaloca memoria
+	free(tparts);
+	free(data);
 	return 0;
 }
