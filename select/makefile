@@ -48,19 +48,22 @@ clean :
 
 
 testes : sequential_select parallel_select 
+	@echo "init tests:" > test.log
 	@for number in 1000000 10000000 100000000 1000000000  ; do \
 		echo "sequential_select $$number" ; \
-		./sequential_select $$number 555 t ; \
-		./sequential_select $$number 555 t ; \
-		./sequential_select $$number 555 t ; \
+		echo "sequential_select $$number" >> test.log; \
+		./sequential_select $$number 555 t >> test.log; \
+		./sequential_select $$number 555 t >> test.log; \
+		./sequential_select $$number 555 t >> test.log; \
 	done
 
 	@for number in 1000000 10000000 100000000 1000000000 ; do \
 		for threads in 2 4 8 ; do \
 	    	echo "parallel_select $$number $$threads" ; \
-	    	./parallel_select $$number 555 t $$threads; \
-	    	./parallel_select $$number 555 t $$threads; \
-	    	./parallel_select $$number 555 t $$threads; \
+	    	echo "parallel_select $$number $$threads" >> test.log; \
+	    	./parallel_select $$number 555 t $$threads >> test.log; \
+	    	./parallel_select $$number 555 t $$threads >> test.log; \
+	    	./parallel_select $$number 555 t $$threads >> test.log; \
 		done; \
 	done
 
