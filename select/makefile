@@ -67,4 +67,23 @@ testes : sequential_select parallel_select
 		done; \
 	done
 
+test_analise : sequential_select parallel_select 
+	@echo "init tests:" > test_anl.log
+
+	@for number in 10000 100000 1000000 10000000 100000000 1000000000 ; do \
+		echo "parallel_select $$number 8" ; \
+		echo "parallel_select $$number 8" >> test_anl.log; \
+		./parallel_select $$number 555 t 8 >> test_anl.log; \
+		./parallel_select $$number 555 t 8 >> test_anl.log; \
+		./parallel_select $$number 555 t 8 >> test_anl.log; \
+	done
+
+	for threads in 1 2 3 4 5 6 7 8 ; do \
+		echo "parallel_select 100000000 $$threads" ; \
+		echo "parallel_select 100000000 $$threads" >> test_anl.log; \
+		./parallel_select 100000000 555 t $$threads >> test_anl.log; \
+		./parallel_select 100000000 555 t $$threads >> test_anl.log; \
+		./parallel_select 100000000 555 t $$threads >> test_anl.log; \
+	done
+
 .PHONY: all run clean val tests testes fresh
