@@ -23,7 +23,7 @@ tree_reduce : tree_reduce.c
 
 run : 
 	$(foreach b, ${BINS}, \
-	./$b ${RUN_ARGS};)
+	mpiexec -n 5 ./$b < input )
 
 val :
 	$(Vflags) ./${RUN_ARGS}
