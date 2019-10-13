@@ -19,7 +19,7 @@ MPI_Init(&argc,&argv);
 MPI_Comm_size(MPI_COMM_WORLD,&size);
 MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 n=atoi(argv[1]);
-printf("Rank =%d n= %d \n",rank,n);
+printf("Rank: %d size: %d n: %d \n",rank,size,n);
 count=n/size;
 
 d=(int*)malloc(count*sizeof(int));
