@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 
 #include <mpi.h>
 
-#define print_log 0 // Setar 1 para imprimir as etapas
+#define print_log 0  // Setar 1 para imprimir as etapas
 
 void print_array(float *V, int size)
 {
@@ -22,7 +21,7 @@ int main(int argc, char **argv)
     int to_print, to_time;
     int i, j, n_procs, rank, count;
 
-    struct timeval start_time, end_time;
+    double start_time, end_time;
 
     // Inicia programacao distribuida
     MPI_Init(&argc, &argv);
@@ -35,18 +34,18 @@ int main(int argc, char **argv)
     if (rank == 0)
     {
         // Inicia a contagem do tempo
-        gettimeofday(&start_time, NULL);
+        start_time = MPI_Wtime();
 
         // Le entrada
         // Opcao de impressao
         scanf(" %s", option);
         if (print_log)
-            printf("Lido : %s\n", option);
+            printf("Lido opção de impressão: %s\n", option);
 
         // Tamanho da entrada
         scanf(" %d", &data_length);
         if (print_log)
-            printf("Lido : %d\n", data_length);
+            printf("Lido tamanho da entrada: %d\n", data_length);
 
         // Tamanho do vetor auxiliar
         count = (data_length / n_procs);
@@ -67,7 +66,7 @@ int main(int argc, char **argv)
         {
             MPI_Send(&count, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
             if (print_log)
-                printf("Enviado count=%d para %d\n", count, i);
+                printf("Enviado tamanho do vetor auxiliar count=%d para %d\n", count, i);
         }
     }
     else
@@ -75,11 +74,12 @@ int main(int argc, char **argv)
         //  Recebe o tamanho do vetor auxiliar
         MPI_Recv(&count, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         if (print_log)
-            printf("Recebido count=%d de %d\n", count, 0);
+            printf("Recebido tamanho do vetor auxiliar count=%d de %d\n", count, 0);
 
         // Cria vetor auxiliar
         sum_aux = (float *)calloc(count, sizeof(float));
     }
+
 
     j = 0;
     sum = 0.0;
@@ -92,12 +92,14 @@ int main(int argc, char **argv)
             // Popula vetor
             scanf(" %f", &data[i]);
             if (print_log)
-                printf("Lido : %f\n", data[i]);
+                printf("Lido dos valores de entrada: %f\n", data[i]);
         }
 
         if (print_log)
+        {
+            printf("Vetor de entrada:\n");
             print_array(data, data_length);
-
+        }
         // Distribui dados a partir do processo zero
         for (i = 0; i < count * n_procs; i++)
         {
@@ -134,7 +136,7 @@ int main(int argc, char **argv)
 
             MPI_Recv(&sum_aux[j++], 1, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             if (print_log)
-                printf("i %d Recebido %f de %d\n", i, sum_aux[j - 1], 0);
+                printf("Processo %d indice %d Recebendo valor %f do processo %d\n", rank, i, sum_aux[j - 1], 0);
         }
     }
 
@@ -148,28 +150,29 @@ int main(int argc, char **argv)
         [1] = {4,5,6}
         [2] = {7,8,9}
 
-        [0] {3}=> [1]   
-        [1] {6}=> [2]   
-        [2] {9}=> [0] 
+        [0] {3}=> [1]
+        [1] {6}=> [2]
+        [2] {9}=> [0]
 
         [0] = {10,2}
         [1] = {7,5}
-        [2] = {13,8}   
+        [2] = {13,8}
 
-        [0] {2}=> [1]   
-        [1] {5}=> [2]   
-        [2] {8}=> [0] 
-       
+        [0] {2}=> [1]
+        [1] {5}=> [2]
+        [2] {8}=> [0]
+
         [0] = {18}
         [1] = {9}
-        [2] = {18}   
+        [2] = {18}
     */
     i = count - 1;
     while (i > 0)
     {
         if (print_log)
-            printf("Rank %d Loop %d\n", rank, i);
-
+        {
+            printf("Rank %d Loop %d, Vetor no loop:\n", rank, i);
+        }
         // Envia valor para o proximo vizinho
         if (rank == n_procs - 1)
             MPI_Send(&sum_aux[i], 1, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
@@ -177,7 +180,7 @@ int main(int argc, char **argv)
             MPI_Send(&sum_aux[i], 1, MPI_FLOAT, (rank + 1) % n_procs, 0, MPI_COMM_WORLD);
 
         if (print_log)
-            printf("Enviado %f para %d\n", sum_aux[i], (rank + 1) % n_procs);
+            printf("Enviado valor de %f para o processo %d\n", sum_aux[i], (rank + 1) % n_procs);
 
         // Envia valor do vizinho anterior
         if (rank == 0)
@@ -186,7 +189,7 @@ int main(int argc, char **argv)
             MPI_Recv(&sum, 1, MPI_FLOAT, (rank - 1) % n_procs, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
         if (print_log)
-            printf("Recebido %f de %d\n", sum, (rank - 1) % n_procs);
+            printf("Prcoesso %d Recebido valor de %f do processo %d\n", rank, sum, (rank - 1) % n_procs);
 
         sum_aux[0] += sum;
 
@@ -200,54 +203,74 @@ int main(int argc, char **argv)
 
     // Reducao paralela
 
-    /* 
+    /*
     EX:
     [0][1][2][3][4][5][6][7][8][9]
-    
+
     Eliminando ranks impares
     Cada processo Impar envia seu valor para o vizinho anterior
     [0]<=[1] [2]<=[3] [4]<=[5] [6]<=[7] [8]<=[9]
-    
+
     Eliminando multiplos de 2, 4, 8 ...
     Cada processo nao multiplo de 4 envia seu valor para o segundo vizinho anterior
     [0]<=[2] [4]<=[6] [8]
-    
+
     Cada processo nao multiplo de 8 envia seu valor para o quarto vizinho anterior
     [0]<=[4] [8]
-    
+
     Cada processo nao multiplo de 16 envia seu valor para o oitavo vizinho anterior
     [0]<=[8]
-    
+
     ...
-    */ 
+    */
+    //Condicao de parada se tiver + processos doq números para somar usa n_procs
+    //Se tiver + processos doq numeros para se somar, usa data_length
+    int end_condition;
+    end_condition = (data_length > n_procs ? n_procs : data_length);
+
     i = 1;
     while (1)
     {
-        // processos ociosos terminam
-        if (sum == 0)
-            break;
-
-        // Testa multiplicidade 
+        // Testa multiplicidade
         if (rank % (i * 2) == 0)
         {
-            if (rank < n_procs - i)
-                MPI_Recv(&aux, 1, MPI_FLOAT, rank + i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            sum += aux;
-            if (print_log)
-                printf("Rank %d Recebido %f de %d\n", rank, aux, rank + i);
+
+            // A segunda condição (rank+i < n_procs) garante não receber duas vezes a mesma mensagem
+            if ((rank < n_procs - i ) && (rank+i < n_procs))
+            {
+              MPI_Recv(&aux, 1, MPI_FLOAT, rank + i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+              sum += aux;
+              if (print_log)
+              {
+                printf("condicoes do if rank %d n_procs-1 %d\n", rank, n_procs-1);
+                printf("---Rank %d Recebido %f de %d, valor da soma %f\n", rank, aux, rank + i, sum);
+              }
+            }
         }
         else
         {
             MPI_Send(&sum, 1, MPI_FLOAT, rank - i, 0, MPI_COMM_WORLD);
             if (print_log)
-                printf("Rank %d Enviado %f para %d\n", rank, sum, rank - i);
+                printf("Rank %d Enviado %f para %d, sum = 0, i*2= %d\n", rank, sum, rank - i, i*2);
             sum = 0;
         }
 
-        // Termina o rank 0
         i *= 2;
-        if (i > n_procs)
+        // Termina o rank 0
+        if(rank == 0 && print_log)
+        {
+            //printf("Processo 0 i *= 2 %d\n", i);
+            printf("Processo 0 end_condition i >= %d\n", end_condition);
+        }
+
+        if (rank == 0 && i >= end_condition)
             break;
+
+        // processos ociosos terminam
+        // impar pode terminar no primeiro send, par depende de não ser multiplo do i atual
+        if (( (sum == 0) && (rank % 2 != 0) ) || ( (sum == 0) && (rank % i != 0) ))
+            break;
+
     }
 
     if (rank == 0)
@@ -263,16 +286,16 @@ int main(int argc, char **argv)
             to_print = 1;
 
         // Encerra a contagem do tempo
-        gettimeofday(&end_time, NULL);
+        end_time = MPI_Wtime();
 
         // Imprime os numeros do grupo
         if (to_print)
         {
             printf("%.2f \n", sum);
         }
-        // Imprime o tempo
+        // Imprime o tempo em milisgundos
         if (to_time)
-            printf("%.1f\n", ((end_time.tv_sec - start_time.tv_sec) * 1000000u + end_time.tv_usec - start_time.tv_usec) / 1e3);
+            printf("%.2lf\n", (end_time - start_time)*1000.0);
     }
 
     // Finaliza programacao distribuida
