@@ -3,8 +3,8 @@ CFLAGS = -Wall
 TFLAGS = -lpthread 
 Vflags = valgrind --leak-check=full
 
-SRCS = tree_reduce.c
-BINS = tree_reduce
+SRCS = tree_reduce.c sequential_reduce.c
+BINS = tree_reduce sequential_reduce
 
 # If the first argument is "run"...
 ifeq (run,$(firstword $(MAKECMDGOALS)))
@@ -19,6 +19,10 @@ all : ${BINS}
 tree_reduce : tree_reduce.c
 	@echo "Checking.."
 	$(CC) $(CFLAGS) -g tree_reduce.c -o tree_reduce 
+
+sequential_reduce : sequential_reduce.c
+	@echo "Checking.."
+	$(CC) $(CFLAGS) -g sequential_reduce.c -o sequential_reduce 
 
 
 run : 
@@ -35,4 +39,5 @@ clean :
 	rm -rvf *.o ${BINS}
 
 
-.PHONY: all run clean val tests testes fresh
+.PHONY: all run clean val tests fresh
+

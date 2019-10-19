@@ -4,7 +4,7 @@
 
 #include <mpi.h>
 
-#define print_log 0  // Setar 1 para imprimir as etapas
+#define print_log 0 // Setar 1 para imprimir as etapas
 
 void print_array(float *V, int size)
 {
@@ -79,7 +79,6 @@ int main(int argc, char **argv)
         // Cria vetor auxiliar
         sum_aux = (float *)calloc(count, sizeof(float));
     }
-
 
     j = 0;
     sum = 0.0;
@@ -201,76 +200,40 @@ int main(int argc, char **argv)
     // Libera memoria que nao sera mais utilizada
     free(sum_aux);
 
-    // Reducao paralela
+    // Reducao sequencial
 
     /*
     EX:
     [0][1][2][3][4][5][6][7][8][9]
 
     Eliminando ranks impares
-    Cada processo Impar envia seu valor para o vizinho anterior
-    [0]<=[1] [2]<=[3] [4]<=[5] [6]<=[7] [8]<=[9]
-
-    Eliminando multiplos de 2, 4, 8 ...
-    Cada processo nao multiplo de 4 envia seu valor para o segundo vizinho anterior
-    [0]<=[2] [4]<=[6] [8]
-
-    Cada processo nao multiplo de 8 envia seu valor para o quarto vizinho anterior
-    [0]<=[4] [8]
-
-    Cada processo nao multiplo de 16 envia seu valor para o oitavo vizinho anterior
-    [0]<=[8]
-
-    ...
+    Cada processo envia seu valor para o zero
+    [0]<=[1] 
+    [0]<=[2] 
+    [0]<=[3] 
+    [0]<=[4] 
+    [0]<=[5] 
+    [0]<=[6] 
+    [0]<=[7] 
+    [0]<=[8] 
+    [0]<=[9] 
     */
-    //Condicao de parada se tiver + processos doq números para somar usa n_procs
-    //Se tiver + processos doq numeros para se somar, usa data_length
-    int end_condition;
-    end_condition = (data_length > n_procs ? n_procs : data_length);
-
-    i = 1;
-    while (1)
+   
+    if (rank == 0)
     {
-        // Testa multiplicidade
-        if (rank % (i * 2) == 0)
+        for (j = 1; j < n_procs; j++)
         {
-
-            // A segunda condição (rank+i < n_procs) garante não receber duas vezes a mesma mensagem
-            if ((rank < n_procs - i ) && (rank+i < n_procs))
-            {
-              MPI_Recv(&aux, 1, MPI_FLOAT, rank + i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-              sum += aux;
-              if (print_log)
-              {
-                printf("condicoes do if rank %d n_procs-1 %d\n", rank, n_procs-1);
-                printf("---Rank %d Recebido %f de %d, valor da soma %f\n", rank, aux, rank + i, sum);
-              }
-            }
-        }
-        else
-        {
-            MPI_Send(&sum, 1, MPI_FLOAT, rank - i, 0, MPI_COMM_WORLD);
+            MPI_Recv(&aux, 1, MPI_FLOAT, j, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            sum += aux;
             if (print_log)
-                printf("Rank %d Enviado %f para %d, sum = 0, i*2= %d\n", rank, sum, rank - i, i*2);
-            sum = 0;
+                printf("[%d] <== [%d] {%.4f} , sum = %.2f\n", rank, j, aux, sum);
         }
-
-        i *= 2;
-        // Termina o rank 0
-        if(rank == 0 && print_log)
-        {
-            //printf("Processo 0 i *= 2 %d\n", i);
-            printf("Processo 0 end_condition i >= %d\n", end_condition);
-        }
-
-        if (rank == 0 && i >= end_condition)
-            break;
-
-        // processos ociosos terminam
-        // impar pode terminar no primeiro send, par depende de não ser multiplo do i atual
-        if (( (sum == 0) && (rank % 2 != 0) ) || ( (sum == 0) && (rank % i != 0) ))
-            break;
-
+    }
+    else
+    {
+        MPI_Send(&sum, 1, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+        if (print_log)
+            printf("[%d] ==> [%d] {%.4f} \n", rank, 0, sum);
     }
 
     if (rank == 0)
@@ -295,7 +258,7 @@ int main(int argc, char **argv)
         }
         // Imprime o tempo em milisgundos
         if (to_time)
-            printf("%.2lf\n", (end_time - start_time)*1000.0);
+            printf("%.2lf\n", (end_time - start_time) * 1000.0);
     }
 
     // Finaliza programacao distribuida
